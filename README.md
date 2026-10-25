@@ -11,6 +11,7 @@
 | 16-key DTMF payphone | https://djshellshoxxx.github.io/webphreak/ | Classic telephone keypad plus A/B/C/D |
 | Hacked Numpad Prototype | https://djshellshoxxx.github.io/webphreak/prototype.html | Historic North American call-progress and MF tones |
 | Signal Laboratory | https://djshellshoxxx.github.io/webphreak/signals.html | R2, radio, alert, and maintenance-tone demonstrations |
+| 1980s Phreak Tribute | https://djshellshoxxx.github.io/webphreak/tribute.html | Steel payphone keypad (DTMF + A–D), blue box MF + 2600 Hz, call-progress tones, frequency mixer |
 
 The addresses above assume GitHub Pages is enabled and publishing from `main` at `/ (root)`. A published site has **not** been independently verified.
 
@@ -94,6 +95,15 @@ Buttons are labeled `F12` through `F56` and `B12` through `B56`, where the two d
 | UK33 | Historical UK dial tone | 400 + 33 Hz |
 | UK50 | Historical UK dial tone | 400 + 50 Hz |
 
+### 4. 1980s Phreak Tribute — `tribute.html`
+
+Brushed-steel payphone keypad filling most of the screen, with LCD readout. Four parts:
+
+- **Keypad** – 16-key DTMF; A/B/C/D in red with Autovon FO/F/I/P labels. Press and hold; keyboard `0-9 * # A-D` works.
+- **Blue Box** – R1 MF: 1–9, 0/10, 11/ST3, 12/ST2, KP, KP2, ST (700–1700 Hz pairs) and 2600 Hz.
+- **Tones** – dial, busy, ringback, reorder, off-hook howler, SIT intercept (913.8/1370.6/1776.7 Hz), SIT + reorder, call waiting, stutter dial, nickel/quarter coin tones, 2600 Hz seize. Tap to latch, tap again or STOP to end.
+- **Freqs** – latch any DTMF, MF or call-progress frequency on/off and mix freely.
+
 ### Interactive behavior
 
 - Pointer-down starts the signal.
@@ -114,6 +124,7 @@ webphreak/
 ├── index.html        # Metallic 16-key DTMF payphone
 ├── prototype.html    # PCB-style call-progress / MF board
 ├── signals.html      # Historical signaling laboratory
+├── tribute.html      # 1980s phreak tribute: DTMF, blue box, tones, mixer
 └── README.md         # Documentation
 ```
 

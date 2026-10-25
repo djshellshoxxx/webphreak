@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#1a1d21">
+<title>WebPhreak Payphone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #15171a;
+    --bezel: #2a2e33;
+    --steel-hi: #f2f4f6;
+    --steel-mid: #b9bec4;
+    --steel-lo: #7d838a;
+    --groove: #5d636a;
+    --ink: #17191c;
+    --red-hi: #ff6b5e;
+    --red-lo: #a3201a;
+    --lcd-bg: #9fb98a;
+    --lcd-ink: #1f2b17;
+    --blue: #2e6bd8;
+    --blue-hi: #6aa0ff;
+    --text: #e8eaed;
+    --muted: #9aa1a9;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: radial-gradient(ellipse at top, #262a30 0%, var(--bg) 70%);
+    color: var(--text);
+    font-family: "Oswald", system-ui, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    padding: max(10px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+    -webkit-user-select: none; user-select: none;
+    touch-action: manipulation;
+  }
+  .wrap { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 12px; }
+
+  header { display: flex; align-items: baseline; justify-content: space-between; }
+  h1 { font-size: 22px; margin: 0; letter-spacing: 3px; text-transform: uppercase; }
+  h1 span { color: var(--blue-hi); }
+  .tag { font-size: 12px; color: var(--muted); letter-spacing: 2px; }
+
+  /* LCD */
+  .lcd {
+    background: linear-gradient(180deg, #b4cc9f, var(--lcd-bg));
+    color: var(--lcd-ink);
+    border-radius: 6px;
+    border: 3px solid #0d0f11;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,.35);
+    font-family: "VT323", monospace;
+    padding: 4px 10px;
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    min-height: 52px;
+  }
+  .lcd .digits { font-size: 30px; letter-spacing: 3px; white-space: nowrap; overflow: hidden; direction: rtl; text-align: left; flex: 1; }
+  .lcd .digits bdi { direction: ltr; }
+  .lcd .freq { font-size: 18px; text-align: right; line-height: 1; min-width: 92px; }
+  .lcd button {
+    font-family: inherit; font-size: 18px; background: rgba(0,0,0,.12); color: var(--lcd-ink);
+    border: 1px solid rgba(0,0,0,.35); border-radius: 4px; padding: 2px 8px; cursor: pointer;
+  }
+
+  /* Steel faceplate */
+  .plate {
+    background:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px),
+      linear-gradient(180deg, #d5d9dd, #a9aeb4 50%, #c6cacf);
+    border-radius: 14px;
+    padding: 10px;
+    border: 4px solid var(--bezel);
+    box-shadow: 0 10px 30px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.6);
+  }
+  .keypad {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+    height: min(62vh, 600px);
+    min-height: 330px;
+  }
+  .row {
+    display: contents;
+  }
+  .cell {
+    min-width: 0; min-height: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: 6px;
+    border-bottom: 3px solid var(--groove);
+    box-shadow: 0 1px 0 rgba(255,255,255,.7);
+  }
+  .cell.last { border-bottom: 0; box-shadow: none; }
+  .key {
+    position: relative;
+    width: 100%; height: 100%;
+    max-width: 120px; max-height: 120px;
+    border: 0; border-radius: 12px;
+    color: var(--ink);
+    cursor: pointer;
+    font-family: "Oswald", sans-serif;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,.55), transparent 55%),
+      repeating-radial-gradient(circle at 50% 50%, rgba(0,0,0,.025) 0 1px, transparent 1px 2px),
+      linear-gradient(160deg, var(--steel-hi), var(--steel-mid) 55%, var(--steel-lo));
+    box-shadow:
+      0 6px 0 #4a4f55,
+      0 9px 14px rgba(0,0,0,.45),
+      inset 0 2px 1px rgba(255,255,255,.9),
+      inset 0 -3px 4px rgba(0,0,0,.25);
+    transform: translateY(0);
+    transition: transform 40ms, box-shadow 40ms;
+  }
+  .key .n { font-size: clamp(30px, 9vw, 54px); font-weight: 700; line-height: 1; }
+  .key .l { font-size: clamp(11px, 3.2vw, 17px); font-weight: 700; letter-spacing: 1px; margin-top: 2px; min-height: 1em; }
+  .key.ext {
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,.45), transparent 55%),
+      linear-gradient(160deg, var(--red-hi), #d8372c 55%, var(--red-lo));
+    color: #fff;
+    box-shadow:
+      0 6px 0 #5c120e,
+      0 9px 14px rgba(0,0,0,.45),
+      inset 0 2px 1px rgba(255,255,255,.55),
+      inset 0 -3px 4px rgba(0,0,0,.3);
+  }
+  .key.down {
+    transform: translateY(5px);
+    box-shadow:
+      0 1px 0 #4a4f55,
+      0 2px 4px rgba(0,0,0,.4),
+      inset 0 2px 6px rgba(0,0,0,.35);
+  }
+  .key.ext.down { box-shadow: 0 1px 0 #5c120e, 0 2px 4px rgba(0,0,0,.4), inset 0 2px 6px rgba(0,0,0,.4); }
+  .key:focus-visible { outline: 3px solid var(--blue-hi); outline-offset: 3px; }
+
+  /* Console */
+  .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .tab {
+    font-family: inherit; font-size: 15px; letter-spacing: 2px; text-transform: uppercase;
+    background: var(--bezel); color: var(--muted);
+    border: 0; border-radius: 8px 8px 0 0; padding: 10px 4px; cursor: pointer;
+  }
+  .tab[aria-selected="true"] { background: #33383e; color: var(--text); box-shadow: inset 0 -3px 0 var(--blue-hi); }
+  .panel {
+    background: #33383e; border-radius: 0 0 12px 12px; padding: 12px;
+  }
+  .panel[hidden] { display: none; }
+  .hint { color: var(--muted); font-size: 13px; margin: 0 0 10px; font-family: system-ui, sans-serif; line-height: 1.4; }
+  .grid { display: grid; gap: 8px; }
+  .g4 { grid-template-columns: repeat(4, 1fr); }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .g2 { grid-template-columns: repeat(2, 1fr); }
+  .btn {
+    font-family: inherit; font-size: 17px; letter-spacing: 1px;
+    border: 0; border-radius: 8px; padding: 12px 4px; cursor: pointer;
+    background: linear-gradient(180deg, #4a5058, #3a3f45);
+    color: var(--text);
+    box-shadow: 0 3px 0 #1d2024, inset 0 1px 0 rgba(255,255,255,.12);
+    display: flex; flex-direction: column; align-items: center; gap: 2px; line-height: 1.1;
+  }
+  .btn small { font-size: 11px; color: var(--muted); letter-spacing: 0; font-family: system-ui, sans-serif; }
+  .btn.blue { background: linear-gradient(180deg, #3b7cf0, #2257b8); box-shadow: 0 3px 0 #123372, inset 0 1px 0 rgba(255,255,255,.2); }
+  .btn.blue small { color: #cfe0ff; }
+  .btn.down, .btn.on { transform: translateY(2px); box-shadow: 0 1px 0 #1d2024, inset 0 2px 6px rgba(0,0,0,.4); filter: brightness(1.25); }
+  .btn.on { outline: 2px solid var(--blue-hi); }
+  .btn.wide { grid-column: span 2; }
+  .sub { font-size: 13px; letter-spacing: 2px; color: var(--muted); margin: 14px 0 6px; text-transform: uppercase; }
+  .sub:first-of-type { margin-top: 0; }
+  .stop { margin-top: 12px; width: 100%; background: linear-gradient(180deg, #c2382e, #8e1f18); box-shadow: 0 3px 0 #4f0f0b; }
+  .vol { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; letter-spacing: 2px; }
+  .vol input { flex: 1; accent-color: var(--blue-hi); }
+
+  nav { display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: center; font-size: 13px; letter-spacing: 1px; }
+  nav a { color: var(--blue-hi); }
+  footer { color: var(--muted); font-size: 12px; text-align: center; font-family: system-ui, sans-serif; line-height: 1.5; }
+
+  @media (max-height: 700px) {
+    .keypad { height: 56vh; min-height: 300px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Web<span>Phreak</span></h1>
+    <div class="tag">EST. 1984 · 2600 HZ</div>
+  </header>
+
+  <div class="lcd" aria-live="polite">
+    <div class="digits" id="digits"><bdi>READY</bdi></div>
+    <div class="freq" id="freq">--- HZ<br>--- HZ</div>
+    <button id="clear" aria-label="Clear display">CLR</button>
+  </div>
+
+  <div class="plate">
+    <div class="keypad" id="keypad" aria-label="DTMF keypad"></div>
+  </div>
+
+  <div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-tab="mf">Blue Box</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="tones">Tones</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="freq">Freqs</button>
+    </div>
+
+    <section class="panel" id="panel-mf">
+      <p class="hint">In-band MF signaling (R1). Seize the trunk with 2600 Hz, then KP + digits + ST. Hold to play.</p>
+      <div class="grid g4" id="mfgrid"></div>
+    </section>
+
+    <section class="panel" id="panel-tones" hidden>
+      <p class="hint">North American call progress tones. Tap to start, tap again (or STOP) to end.</p>
+      <div class="grid g2" id="tonegrid"></div>
+    </section>
+
+    <section class="panel" id="panel-freq" hidden>
+      <p class="hint">Toggle any frequency on or off. Mix as many as you like.</p>
+      <div class="sub">DTMF low group (rows)</div>
+      <div class="grid g4" data-freqs="697,770,852,941"></div>
+      <div class="sub">DTMF high group (columns)</div>
+      <div class="grid g4" data-freqs="1209,1336,1477,1633"></div>
+      <div class="sub">MF (blue box)</div>
+      <div class="grid g3" data-freqs="700,900,1100,1300,1500,1700"></div>
+      <div class="sub">Supervisory &amp; call progress</div>
+      <div class="grid g4" data-freqs="2600,350,440,480,620,1400,2060,2450"></div>
+    </section>
+
+    <button class="btn stop" id="stopall">STOP ALL SOUND</button>
+  </div>
+
+  <label class="vol">VOL <input type="range" id="vol" min="0" max="100" value="60"></label>
+
+  <nav><a href="./index.html">Payphone</a><a href="./prototype.html">Prototype Board</a><a href="./signals.html">Signal Laboratory</a><a href="./phreak.html">Historical Phreak</a><a href="./heritage.html">Heritage Tones</a></nav>
+
+  <footer>A tribute to the phone phreaks of the 1970s–80s. Keyboard: 0–9 * # A–D.<br>Tones are synthesized in your browser; this is a toy, not a tool.</footer>
+</div>
+
+<script>
+(() => {
+  // ---------- Audio ----------
+  let ctx, master;
+  const audio = () => {
+    if (!ctx) {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      master = ctx.createGain();
+      master.gain.value = vol.value / 100 * 0.5;
+      master.connect(ctx.destination);
+    }
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  };
+
+  // A Voice is a set of sine oscillators through one gain with a short ramp to avoid clicks.
+  const RAMP = 0.006;
+  function voice(freqs, level = 0.35) {
+    const c = audio();
+    const g = c.createGain();
+    g.gain.value = 0;
+    g.connect(master);
+    const per = level / Math.max(1, freqs.length) * 1.6;
+    const oscs = freqs.map(f => {
+      const o = c.createOscillator();
+      o.type = 'sine';
+      o.frequency.value = f;
+      o.connect(g);
+      o.start();
+      return o;
+    });
+    return { g, oscs, per };
+  }
+  function on(v, t) { v.g.gain.setValueAtTime(0, t); v.g.gain.linearRampToValueAtTime(v.per, t + RAMP); }
+  function off(v, t) { v.g.gain.setValueAtTime(v.per, t); v.g.gain.linearRampToValueAtTime(0, t + RAMP); }
+  function kill(v) {
+    const t = ctx.currentTime;
+    v.g.gain.cancelScheduledValues(t);
+    v.g.gain.setValueAtTime(v.g.gain.value, t);
+    v.g.gain.linearRampToValueAtTime(0, t + RAMP);
+    v.oscs.forEach(o => o.stop(t + RAMP + 0.01));
+    setTimeout(() => v.g.disconnect(), 100);
+  }
+
+  // Momentary tone: held while the pointer is down, with a minimum length so taps are audible.
+  const MIN_MS = 120;
+  function hold(freqs) {
+    const v = voice(freqs);
+    on(v, ctx.currentTime);
+    const started = performance.now();
+    return () => setTimeout(() => kill(v), Math.max(0, MIN_MS - (performance.now() - started)));
+  }
+
+  // Cadenced tone: segments of [freqs|null, seconds] repeated (or once).
+  let pattern = null;
+  function playPattern(def) {
+    stopPattern();
+    const c = audio();
+    const voices = new Map();
+    const getV = fs => {
+      const k = fs.join(',');
+      if (!voices.has(k)) voices.set(k, voice(fs, def.level || 0.35));
+      return voices.get(k);
+    };
+    def.segs.forEach(([fs]) => fs && getV(fs));
+    const cycle = def.segs.reduce((s, [, d]) => s + d, 0);
+    let next = c.currentTime + 0.03;
+    let stopped = false;
+    const schedule = () => {
+      if (stopped) return;
+      while (next < c.currentTime + 1.5) {
+        let t = next;
+        for (const [fs, d] of def.segs) {
+          if (fs) { const v = getV(fs); on(v, t); off(v, t + d - RAMP); }
+          t += d;
+        }
+        next += cycle;
+        if (def.once) { stopped = true; setTimeout(() => pattern && pattern.id === id && stopPattern(), (next - c.currentTime) * 1000 + 50); break; }
+      }
+    };
+    const id = Symbol();
+    schedule();
+    const timer = setInterval(schedule, 250);
+    pattern = { id, stop() { stopped = true; clearInterval(timer); voices.forEach(kill); } };
+    return pattern;
+  }
+  function stopPattern() {
+    if (pattern) { pattern.stop(); pattern = null; }
+    document.querySelectorAll('#tonegrid .btn.on').forEach(b => b.classList.remove('on'));
+  }
+
+  // ---------- Display ----------
+  const digitsEl = document.getElementById('digits');
+  const freqEl = document.getElementById('freq');
+  let dialed = '';
+  function show(sym, freqs) {
+    if (sym) {
+      dialed = (dialed + sym).slice(-40);
+      digitsEl.innerHTML = '<bdi></bdi>';
+      digitsEl.firstChild.textContent = dialed;
+    }
+    if (freqs) {
+      const f = freqs.slice(0, 2).map(x => `${x} HZ`);
+      freqEl.innerHTML = (f[0] || '---') + '<br>' + (f[1] || (freqs.length > 2 ? `+${freqs.length - 1} more` : '&nbsp;'));
+    }
+  }
+  function showText(txt, freqs) {
+    digitsEl.innerHTML = '<bdi></bdi>';
+    digitsEl.firstChild.textContent = txt;
+    if (freqs) show(null, freqs);
+  }
+  document.getElementById('clear').onclick = () => { dialed = ''; showText('READY'); freqEl.innerHTML = '--- HZ<br>--- HZ'; };
+
+  // Press-and-hold wiring shared by every momentary button.
+  function momentary(el, start) {
+    let release = null;
+    const down = e => {
+      e.preventDefault();
+      if (release) return;
+      el.classList.add('down');
+      release = start();
+      if (e.pointerId !== undefined) el.setPointerCapture?.(e.pointerId);
+    };
+    const up = () => {
+      if (!release) return;
+      el.classList.remove('down');
+      release(); release = null;
+    };
+    el.addEventListener('pointerdown', down);
+    el.addEventListener('pointerup', up);
+    el.addEventListener('pointercancel', up);
+    el.addEventListener('lostpointercapture', up);
+    el.addEventListener('contextmenu', e => e.preventDefault());
+    el.addEventListener('keydown', e => { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) down(e); });
+    el.addEventListener('keyup', e => { if (e.key === ' ' || e.key === 'Enter') up(); });
+    return { down, up };
+  }
+
+  // ---------- DTMF keypad ----------
+  const ROWS = [697, 770, 852, 941];
+  const COLS = [1209, 1336, 1477, 1633];
+  const KEYS = [
+    ['1', ''], ['2', 'ABC'], ['3', 'DEF'], ['A', 'FO'],
+    ['4', 'GHI'], ['5', 'JKL'], ['6', 'MNO'], ['B', 'F'],
+    ['7', 'PRS'], ['8', 'TUV'], ['9', 'WXY'], ['C', 'I'],
+    ['*', ''], ['0', 'OPER'], ['#', ''], ['D', 'P'],
+  ];
+  const keypad = document.getElementById('keypad');
+  const keyMap = {};
+  KEYS.forEach(([n, l], i) => {
+    const r = Math.floor(i / 4), c = i % 4;
+    const freqs = [ROWS[r], COLS[c]];
+    const cell = document.createElement('div');
+    cell.className = 'cell' + (r === 3 ? ' last' : '');
+    const b = document.createElement('button');
+    b.className = 'key' + (c === 3 ? ' ext' : '');
+    b.setAttribute('aria-label', `${n}: ${freqs[0]} and ${freqs[1]} hertz`);
+    b.innerHTML = `<span class="n">${n === '*' ? '✱' : n}</span><span class="l">${l}</span>`;
+    cell.appendChild(b);
+    keypad.appendChild(cell);
+    keyMap[n.toLowerCase()] = momentary(b, () => { show(n, freqs); return hold(freqs); });
+  });
+
+  // ---------- Blue box (MF) ----------
+  const MF = [
+    ['1', [700, 900]], ['2', [700, 1100]], ['3', [900, 1100]], ['KP', [1100, 1700], 'blue'],
+    ['4', [700, 1300]], ['5', [900, 1300]], ['6', [1100, 1300]], ['KP2', [1300, 1700], 'blue'],
+    ['7', [700, 1500]], ['8', [900, 1500]], ['9', [1100, 1500]], ['ST', [1500, 1700], 'blue'],
+    ['11 / ST3', [700, 1700], 'blue', 'S3'], ['0 / 10', [1300, 1500], '', '0'], ['12 / ST2', [900, 1700], 'blue', 'S2'], ['2600', [2600], 'blue wide2600'],
+  ];
+  const mfgrid = document.getElementById('mfgrid');
+  MF.forEach(([label, freqs, cls = '', sym]) => {
+    const b = document.createElement('button');
+    b.className = 'btn ' + cls;
+    b.innerHTML = `${label}<small>${freqs.join(' + ')}</small>`;
+    mfgrid.appendChild(b);
+    const s = sym || (label === '2600' ? '~' : label === 'KP' ? 'K' : label === 'KP2' ? 'K2' : label === 'ST' ? 'S' : label);
+    momentary(b, () => { show(s, freqs); return hold(freqs); });
+  });
+
+  // ---------- Call progress tones ----------
+  const TONES = [
+    { name: 'Dial Tone', sub: '350 + 440 continuous', segs: [[[350, 440], 10]] },
+    { name: 'Busy', sub: '480 + 620 · 0.5s on/off', segs: [[[480, 620], 0.5], [null, 0.5]] },
+    { name: 'Ringback', sub: '440 + 480 · 2s on/4s off', segs: [[[440, 480], 2], [null, 4]] },
+    { name: 'Reorder', sub: 'Fast busy · 0.25s on/off', segs: [[[480, 620], 0.25], [null, 0.25]] },
+    { name: 'Off-Hook Howler', sub: '1400+2060+2450+2600', segs: [[[1400, 2060, 2450, 2600], 0.1], [null, 0.1]], level: 0.5 },
+    { name: 'Intercept SIT', sub: '"Not in service"', once: true, segs: [[[913.8], 0.274], [[1370.6], 0.274], [[1776.7], 0.38], [null, 0.6]] },
+    { name: 'Intercept + Busy', sub: 'SIT then reorder', segs: [[[913.8], 0.274], [[1370.6], 0.274], [[1776.7], 0.38], [null, 0.5], [[480, 620], 0.25], [null, 0.25], [[480, 620], 0.25], [null, 0.25], [[480, 620], 0.25], [null, 1]] },
+    { name: 'Call Waiting', sub: '440 · 0.3s beeps', segs: [[[440], 0.3], [null, 9.7]] },
+    { name: 'Stutter Dial', sub: 'Voicemail waiting', segs: [[[350, 440], 0.1], [null, 0.1]] },
+    { name: 'Coin Deposit', sub: '1700 + 2200 · nickel', once: true, segs: [[[1700, 2200], 0.066], [null, 0.6]] },
+    { name: 'Quarter', sub: '1700 + 2200 · 5 beeps', once: true, segs: [[[1700, 2200], 0.033], [null, 0.033], [[1700, 2200], 0.033], [null, 0.033], [[1700, 2200], 0.033], [null, 0.033], [[1700, 2200], 0.033], [null, 0.033], [[1700, 2200], 0.033], [null, 0.6]] },
+    { name: '2600 Seize', sub: 'Wink: 2600 for 1s', once: true, segs: [[[2600], 1], [null, 0.3]] },
+  ];
+  const tonegrid = document.getElementById('tonegrid');
+  TONES.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'btn';
+    b.innerHTML = `${t.name}<small>${t.sub}</small>`;
+    b.onclick = () => {
+      if (b.classList.contains('on')) { stopPattern(); showText('HUNG UP'); return; }
+      stopPattern();
+      b.classList.add('on');
+      const all = [...new Set(t.segs.flatMap(([f]) => f || []))];
+      showText(t.name.toUpperCase(), all);
+      playPattern(t);
+      if (t.once) {
+        const dur = t.segs.reduce((s, [, d]) => s + d, 0) * 1000;
+        setTimeout(() => b.classList.remove('on'), dur);
+      }
+    };
+    tonegrid.appendChild(b);
+  });
+
+  // ---------- Free frequency toggles ----------
+  const freqVoices = new Map();
+  document.querySelectorAll('[data-freqs]').forEach(g => {
+    g.dataset.freqs.split(',').map(Number).forEach(f => {
+      const b = document.createElement('button');
+      b.className = 'btn';
+      b.textContent = `${f} Hz`;
+      b.onclick = () => {
+        if (freqVoices.has(b)) {
+          kill(freqVoices.get(b)); freqVoices.delete(b); b.classList.remove('on');
+        } else {
+          const v = voice([f], 0.25); on(v, ctx.currentTime);
+          freqVoices.set(b, v); b.classList.add('on');
+        }
+        const active = [...freqVoices.values()].map(v => v.oscs[0].frequency.value);
+        showText(active.length ? 'MIX' : 'READY', active.length ? active : null);
+        if (!active.length) freqEl.innerHTML = '--- HZ<br>--- HZ';
+      };
+      g.appendChild(b);
+    });
+  });
+  function stopFreqs() { freqVoices.forEach((v, b) => { kill(v); b.classList.remove('on'); }); freqVoices.clear(); }
+
+  // ---------- Tabs, volume, stop ----------
+  document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+    document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === t));
+    document.querySelectorAll('.panel').forEach(p => p.hidden = p.id !== 'panel-' + t.dataset.tab);
+  });
+  const vol = document.getElementById('vol');
+  vol.oninput = () => { if (master) master.gain.setTargetAtTime(vol.value / 100 * 0.5, ctx.currentTime, 0.02); };
+  document.getElementById('stopall').onclick = () => { stopPattern(); stopFreqs(); showText('HUNG UP'); };
+
+  // ---------- Physical keyboard ----------
+  const held = new Set();
+  addEventListener('keydown', e => {
+    if (e.repeat || e.target.matches('button, input')) return;
+    const k = e.key.toLowerCase();
+    if (keyMap[k] && !held.has(k)) { held.add(k); keyMap[k].down(e); }
+  });
+  addEventListener('keyup', e => {
+    const k = e.key.toLowerCase();
+    if (held.has(k)) { held.delete(k); keyMap[k].up(); }
+  });
+  addEventListener('blur', () => { held.forEach(k => keyMap[k].up()); held.clear(); });
+})();
+</script>
+</body>
+</html>

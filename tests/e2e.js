@@ -315,7 +315,7 @@ async function run(browserName, base) {
     await page.click('#calc-status'); // selects the problem text
     assert.equal(await page.$eval('#formula', t => t.value.slice(t.selectionStart, t.selectionEnd)), '2600mhz');
     await page.fill('#formula', '10(2600Hz@2ms+2msSi)');
-    await page.waitForFunction(() => /✓ 10 tones · 20 steps · 40ms/.test(document.querySelector('#calc-status').textContent));
+    await page.waitForFunction(() => /✓ 10 tones · 10 notes · 40ms/.test(document.querySelector('#calc-status').textContent));
     // Build "DT@2s 1s #411" with the keys.
     await page.click('text=CLR');
     await page.click('.calc-palette summary >> text=Call Progress');
@@ -324,9 +324,9 @@ async function run(browserName, base) {
     await page.click('.ckey >> text=⏸ 1s');
     for (const k of ['#', '4', '1', '1']) await page.click('.calc-pad button[aria-label="Insert key ' + k + '"]');
     assert.equal(await page.inputValue('#formula'), 'DT@2s 1s #411');
-    await page.waitForFunction(() => /✓ 5 tones · 6 steps · 5s/.test(document.querySelector('#calc-status').textContent));
+    await page.waitForFunction(() => /✓ 5 tones · 10 notes · 5s/.test(document.querySelector('#calc-status').textContent));
     await page.click('.ckey >> text=▶ PLAY');
-    assert.equal(await page.evaluate(() => WebPhreak.engine.current && WebPhreak.engine.current.id), 'formula');
+    await page.waitForFunction(() => WebPhreak.engine.current && WebPhreak.engine.current.id === 'formula');
     await page.click('.ckey >> text=■ STOP');
     assert.equal(await page.evaluate(() => WebPhreak.engine.current), null);
     await page.fill('#calc-name', 'Info call');
@@ -344,6 +344,34 @@ async function run(browserName, base) {
     await page.goto(base + 'compose.html#f=' + encodeURIComponent('keys=mf KP 121 ST'));
     assert.equal(await page.inputValue('#formula'), 'keys=mf KP 121 ST');
     assert.match(await status(), /✓ 5 tones/);
+    // Plain-English panel, tidy, autocomplete and a parallel formula rendered in the worker.
+    assert.match(await page.locator('.calc-explain').innerText(), /Digits now play MF trunk tones/);
+    await page.fill('#formula', '10(2600hz @ 2ms+2msSi)');
+    await page.click('.ckey >> text=✨ TIDY');
+    assert.equal(await page.inputValue('#formula'), '10(2600Hz@2ms + 2ms)');
+    await page.fill('#formula', '');
+    await page.type('#formula', 'Dialt');
+    await page.waitForSelector('#calc-suggest:not([hidden])');
+    await page.keyboard.press('Enter');
+    assert.equal(await page.inputValue('#formula'), 'Dialtone');
+    await page.fill('#formula', '{ 200Hz..2000Hz@20s:saw | 40(1@100ms 100ms 2@100ms 100ms) } noise@1s');
+    await page.waitForFunction(() => /3 tracks · 21s/.test(document.querySelector('#calc-status').textContent));
+    await page.click('.ckey >> text=▶ PLAY');
+    await page.waitForFunction(() => WebPhreak.engine.current && WebPhreak.engine.current.id === 'formula', null, { timeout: 10000 });
+    await page.click('.ckey >> text=■ STOP');
+    const [d2] = await Promise.all([page.waitForEvent('download'), page.click('.ckey >> text=⤓ WAV')]);
+    const b2 = fs.readFileSync(await d2.path());
+    assert.equal(wav.decode(b2.buffer.slice(b2.byteOffset, b2.byteOffset + b2.length)).samples.length, 21 * 44100);
+    // Rendered in the browser = rendered in Node (same notes, same samples).
+    const same = await page.evaluate(async () => {
+      const r = WebPhreak.formula.compile('C4@1/4:square~fade(50ms) { noise@100ms | 300Hz..900Hz@200ms }', WebPhreak.catalog);
+      const x = WebPhreak.synth.renderNotes(r.notes, r.duration, { sampleRate: 22050 });
+      let s = 0; for (const v of x) s += v * v; return s;
+    });
+    const SY = require('../assets/js/synth.js'), FO = require('../assets/js/formula.js');
+    const rn = FO.compile('C4@1/4:square~fade(50ms) { noise@100ms | 300Hz..900Hz@200ms }', catalog);
+    let sn = 0; for (const v of SY.renderNotes(rn.notes, rn.duration, { sampleRate: 22050 })) sn += v * v;
+    assert.ok(Math.abs(same - sn) < 1e-6 * sn, 'browser and Node renders match');
     // Every example loads without an error.
     const n = await page.locator('.example').count();
     for (let i = 0; i < n; i++) {

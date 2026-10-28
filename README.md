@@ -49,21 +49,27 @@ Earlier pages still load, so old bookmarks do not 404. Each now shows a table ma
 
 ## Tone formulas (Tone Calculator)
 
-`compose.html` compiles a small formula language (`assets/js/formula.js`) into the same segment list used for playback and WAV export. `+`, commas, spaces and new lines all mean “then”.
+`compose.html` compiles a formula language (`assets/js/formula.js`) into a list of timed notes, renders it once (in a Web Worker when possible) and uses the same samples for playback and WAV export. **Full reference: [`docs/formula-language.md`](docs/formula-language.md)**, also built into the page, with 60+ loadable examples (`assets/js/formula-examples.js`).
 
-| Write | Meaning |
+| Feature | Syntax |
 | --- | --- |
-| `#411` | key presses, one per character (DTMF unless `keys=mf` or `keys=pulse`) |
-| `5@2s`, `2600Hz@2ms`, `1@80` | `@` sets how long a tone sounds (no unit = ms; default 500 ms) |
-| `50ms`, `1sSi`, `Si@250ms` | silence |
-| `KP`, `DT`, `Dialtone`, `[MF 1]`, `[acts-quarter]` | catalog tones by label, alias, id or name |
-| `440Hz`, `1.2kHz` | raw sine frequencies |
-| `697Hz&1209Hz`, `1&5`, `1209Hz%70` | `&` stacks tones together; `%` sets a relative level |
-| `10(2600Hz@2ms 2ms)`, `(1 50ms)x3`, `(KP 121 ST)@68ms` | repeats; `@` after a group sets its default tone length |
-| `tone=70ms gap=50ms keys=mf level=80%` | settings for everything after them |
-| `$num = 5551212` … `$num` | variables (one per line) |
+| Sequence | `+`, commas, spaces and new lines mean “then”; `//` comments |
+| Keys, catalog tones, frequencies, notes | `#411`, `KP`, `[acts-quarter]`, `440Hz`, `C4`, `F#3` |
+| Length, silence | `5@2s`, `1@80` (ms), `50ms`, `1sSi`, `Si@250ms` |
+| Tempo and note lengths | `bpm=120`, `@1/4`, `@1/8.` (dotted), `@1/8t` (triplet), bare `1/4` = rest |
+| Stacking and levels | `697Hz&1209Hz`, `1209Hz%70`, `1209Hz%-6dB` |
+| Groups and repeats | `( … )@68ms`, `10( … )`, `( … )x3`, `KP x2` |
+| Parallel tracks, absolute placement | `{ DT@3s \| 1s 5551212 }`, `at 2s: KP` |
+| Waveforms, glides, noise | `:square` `:triangle` `:saw`, `300Hz..3000Hz`, `noise@1s` |
+| Modifiers | `~fade( )` `~fadein( )` `~fadeout( )` `~am(33Hz)` `~fm(5Hz, 20Hz)` `~detune(2%)` `~gain(-6dB)` |
+| Settings | `tone=` `gap=` `keys=dtmf\|mf\|pulse` `level=` `bpm=` `ramp=` `wave=` `glide=lin\|exp` `twist=` `jitter=` `seed=` `pause=` `wait=` |
+| Dial strings | `"1-800-FLOWERS"` (letters → keys), `,` pause, `;` wait for dial tone |
+| Variables, macros, sections | `$num = 5551212`, `$beep($f, $len) = $f@$len 80ms`, multi-line `$intro = ( … )` |
+| Loops | `for $f in 300Hz..900Hz step 100Hz: $f@100ms`, `for $k in (1, 5, 9): …` |
+| Random (repeatable) | `rand(1..9)`, `rand(KP, ST)`, `rand(300Hz..900Hz)`, `jitter=15ms`, `seed=7` |
+| Cadences | `cadence(440Hz&480Hz, 2s, 4s)x3` |
 
-Errors are reported with line and column, and clicking the message selects the problem (for example `2600mhz` → “Did you mean 2600Hz?”). Limits: 120 s and 20,000 steps per formula. Data bursts cannot be sequenced.
+Editor: live error checking with line/column (click to select), autocomplete, ✨ Tidy (pretty-print without changing the sound), a plain-English explanation, a multi-lane timeline, saved formulas, JSON import/export and share links. Limits: 120 s, 20,000 notes, 10,000 repeats or loop steps.
 
 ## WAV downloads
 
@@ -121,7 +127,8 @@ webphreak/
 │       ├── scope.js        # oscilloscope / spectrum / live readout panel
 │       ├── rotary.js       # draggable rotary dial
 │       ├── decoder.js      # decode.html: catalog sample, file and microphone inputs
-│       ├── formula.js      # tone formula parser/compiler (pure, unit-tested)
+│       ├── formula.js      # tone formula tokenizer/expander/parser/compiler, tidy and explain
+│       ├── render-worker.js # renders formula notes off the main thread
 │       ├── formula-examples.js  # built-in example formulas
 │       ├── composer.js     # compose.html: the Tone Calculator UI
 │       └── ui.js           # nav, controls, tiles, tooltip, dialog, keyboard, tables
@@ -131,6 +138,7 @@ webphreak/
 │   ├── unit.test.js        # node:test – catalog, timing, spectrum, clipping, WAV
 │   └── e2e.js              # Playwright – pages, input, downloads, playback/export match
 ├── docs/research-notes.md  # corrections, conflicts, open research items
+├── docs/formula-language.md  # complete tone formula reference
 └── email2sms/              # Separate Node service, not part of the static site (see below)
 ```
 

@@ -217,6 +217,27 @@
     };
   }
 
+  /** Play pre-rendered samples (tone formulas): playback is sample-identical to the WAV.
+   *  `meta` is an entry-like object ({ id, sym, name }) used for status/events. */
+  function playSamples(samples, sampleRate, meta) {
+    ensure();
+    stop();
+    const v = newVoice(meta);
+    current = v;
+    const buf = ctx.createBuffer(1, samples.length, sampleRate);
+    buf.copyToChannel(samples, 0);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(v.out);
+    const t0 = ctx.currentTime + START_DELAY;
+    src.start(t0);
+    v.nodes.add(src);
+    const finish = () => { if (current === v) { current = null; emit('stop', meta); } killVoice(v); };
+    src.onended = () => { v.nodes.delete(src); finish(); };
+    emit('start', meta);
+    return { entry: meta, startTime: t0, stop: finish, get active() { return !v.stopped; }, get position() { return Math.max(0, ctx.currentTime - t0); } };
+  }
+
   function stop() {
     if (!current) return;
     const v = current;
@@ -275,7 +296,7 @@
   }
 
   WP.engine = {
-    ensure, play, stop, stopAll, setVolume, mixerToggle, renderOffline,
+    ensure, play, playSamples, stop, stopAll, setVolume, mixerToggle, renderOffline,
     on: fn => { listeners.add(fn); return () => listeners.delete(fn); },
     get current() { return current ? current.entry : null; },
     get mixerFrequencies() { return [...mixer.keys()]; },

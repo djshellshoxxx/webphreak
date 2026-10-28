@@ -245,3 +245,11 @@ test('describeTiming reflects cadence', () => {
   assert.match(TL.describeTiming(catalog.byId.get('na-busy')), /480 \+ 620 Hz 500 ms → silence 500 ms \(repeat; cycle 1 s\)/);
   assert.match(TL.describeTiming(catalog.byId.get('dtmf-1')), /Continuous while held/);
 });
+
+test('freqSummary distinguishes simultaneous, sequential and FSK content', () => {
+  assert.equal(TL.freqSummary(catalog.byId.get('dtmf-1')), '697 + 1209 Hz');
+  assert.equal(TL.freqSummary(catalog.byId.get('gb-collect')), '2600 → 700 + 1100 Hz');
+  assert.equal(TL.freqSummary(catalog.byId.get('sit-ic')), '913.8 → 1370.6 → 1776.7 Hz');
+  assert.equal(TL.freqSummary(catalog.byId.get('acts-quarter')), '1700 + 2200 Hz');
+  assert.equal(TL.freqSummary(catalog.byId.get('kcs-hi')), '1200 / 2400 Hz (FSK)');
+});

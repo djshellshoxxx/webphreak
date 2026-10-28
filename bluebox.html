@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="2600 Hz supervision, MF (R1) digits KP and ST, CCITT No. 4, No. 5 and R2 tones, UK AC signalling.">
+<meta name="theme-color" content="#15171a">
+<title>Bluebox / MF / Trunk Signalling · WebPhreak</title>
+<link rel="stylesheet" href="assets/css/webphreak.css">
+<script src="assets/js/refs.js" defer></script>
+<script src="assets/js/timeline.js" defer></script>
+<script src="assets/js/synth.js" defer></script>
+<script src="assets/js/wav.js" defer></script>
+<script src="assets/js/catalog.js" defer></script>
+<script src="assets/js/engine.js" defer></script>
+<script src="assets/js/ui.js" defer></script>
+</head>
+<body class="theme-blue" data-page="bluebox">
+<a class="skip" href="#main">Skip to content</a>
+<nav id="site-nav" aria-label="Tone groups"><a class="brand" href="index.html">WEBPHREAK</a><ul><li><a href="index.html">DTMF Keypad</a></li><li><a href="redbox.html">Payphone / Redbox</a></li><li><a href="bluebox.html">Bluebox / MF / Trunk</a></li><li><a href="progress.html">Call Progress &amp; Alerts</a></li><li><a href="lab.html">Radio, Data &amp; Test</a></li><li><a href="history.html">History &amp; Sources</a></li></ul></nav>
+<main id="main">
+<h1>Bluebox / MF / Trunk Signalling</h1>
+<p class="lede">In-band tones that telephone exchanges once used between themselves. Hold a key to sustain it. Keyboard: digits 0–9 play MF digits, <kbd>K</kbd> = KP, <kbd>S</kbd> = ST, <kbd>X</kbd> = 2600 Hz.</p>
+<template data-intro="sf"><p>Single-frequency (SF) trunks kept 2600 Hz on an idle circuit and removed it when the circuit was seized.</p></template>
+<template data-intro="mf"><p>Multi-frequency (R1) signalling sends each digit as two of six tones. A complete address was KP, the digits, then ST.</p></template>
+<template data-intro="mf-ext"><p>The remaining 1700 Hz combinations. Their frequency pairs agree across sources, but their names differ by system (R1 ST3P/STP/ST2P versus CCITT No. 5 Code 11/Code 12/KP2), so each key lists all names.</p></template>
+<template data-intro="ss5"><p>CCITT Signalling System No. 5, used on international links, combined MF register digits with 2400/2600 Hz line signals.</p></template>
+<template data-intro="ss4"><p>CCITT No. 4 sent digits as binary patterns of 2040 Hz and 2400 Hz elements. Only the tones are reproduced; the binary digit coding is not.</p></template>
+<template data-intro="r2f"><p>R2 multi-frequency compelled signalling: forward combinations from six frequencies, 1380–1980 Hz in 120 Hz steps. Labels give frequency positions only.</p></template>
+<template data-intro="r2b"><p>R2 backward combinations, 540–1140 Hz in 120 Hz steps.</p></template>
+<template data-intro="uk-ac"><p>British “AC” line signalling used single voice-frequency pulses on trunk circuits.</p></template>
+<div class="board"><svg class="wires" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+<path d="M0 12 C 30 4, 40 30, 100 18" fill="none" stroke="#e05a47" stroke-width="3" vector-effect="non-scaling-stroke"/>
+<path d="M0 55 C 25 70, 60 35, 100 62" fill="none" stroke="#e8c14a" stroke-width="3" vector-effect="non-scaling-stroke"/>
+<path d="M0 88 C 40 80, 55 98, 100 84" fill="none" stroke="#4aa3e8" stroke-width="3" vector-effect="non-scaling-stroke"/>
+</svg><div data-board="bluebox"></div></div>
+<details class="help" open>
+  <summary>History: 2600 Hz, in-band signalling and the move out of band</summary>
+  <h3>In-band signalling</h3>
+  <p>Mid-century long-distance trunks carried their control signals in the same audio channel as speech. Bell System engineers described SF and MF signalling in the Bell System Technical Journal, including the 1954 article on in-band single-frequency signalling (<a href="https://www.nokia.com/bell-labs/publications-and-media/publications/in-band-single-frequency-signaling/" target="_blank" rel="noopener noreferrer">Nokia Bell Labs archive</a>) and C. Breen &amp; C. A. Dahlbom, “Signaling Systems for Control of Telephone Switching” (BSTJ, Nov. 1960; <a href="https://www.worldradiohistory.com/Archive-Bell-System-Technical-Journal/60s/Bell-System-Technical-Journal-1960-6-Complete.pdf" target="_blank" rel="noopener noreferrer">scan</a>). Because the control tones travelled on the voice path, a caller who played them into the mouthpiece could be mistaken for exchange equipment; a “blue box” generated 2600 Hz and MF tones for that purpose (<a href="https://en.wikipedia.org/wiki/2600_hertz" target="_blank" rel="noopener noreferrer">Wikipedia: 2600 hertz</a>).</p>
+  <h3>Out-of-band signalling</h3>
+  <p>Common-channel signalling moved call setup onto a separate data network (CCIS in North America from the 1970s, later Signalling System No. 7), so speech-path tones no longer control trunks (<a href="https://en.wikipedia.org/wiki/Signalling_System_No._7" target="_blank" rel="noopener noreferrer">Wikipedia: SS7</a>). Digital transmission also displaced SF trunks. These pages are a listening archive; the tones have no effect on modern networks and nothing here connects to one.</p>
+  <h3>Other systems</h3>
+  <p>CCITT No. 4 and No. 5 served international routes; R2 MFC was widely used in Europe, Latin America and Asia with national variations (<a href="https://en.wikipedia.org/wiki/Signalling_System_R2" target="_blank" rel="noopener noreferrer">Wikipedia: R2</a>). The UK used AC-family line signalling such as AC9 at 2280 Hz (<a href="https://www.britishtelephones.com/pwover1.htm" target="_blank" rel="noopener noreferrer">britishtelephones.com</a>).</p>
+  <p class="evidence">Corrections made in this version: the old ST2P and ST3P keys reused the KP and ST pairs; they now use 1300 + 1700 Hz and 700 + 1700 Hz, consistent with the IANA telephone-event registry naming. Duplicate 2280 Hz keys were merged. See each key’s ⓘ panel.</p>
+</details>
+</main>
+<div id="controls"><noscript><p class="notice">JavaScript is required to generate audio.</p></noscript></div>
+<footer class="site"><p>WebPhreak is a historical audio demonstration. All sound is generated locally in your browser; nothing dials, transmits or connects to a telephone or radio network. Values are labelled by evidence status; see <a href="history.html">History &amp; Sources</a>. Repository: <a href="https://github.com/djshellshoxxx/webphreak">djshellshoxxx/webphreak</a>.</p></footer>
+</body>
+</html>

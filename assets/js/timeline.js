@@ -100,6 +100,22 @@
     return [...set];
   }
 
+  /** Frequencies as heard: '+' joins simultaneous tones, '→' separates sequential segments,
+   *  '/' lists the two tones of an FSK data example. */
+  function freqSummary(entry) {
+    const sets = [];
+    for (const seg of entry.segments) {
+      if (!seg.f || !seg.f.length) continue;
+      const k = seg.f.map(f => +f.toFixed(2)).join(' + ');
+      if (sets[sets.length - 1] !== k) sets.push(k);
+    }
+    if (entry.synthesis === 'fsk' && sets.length > 3) return freqList(entry).map(f => +f.toFixed(2)).sort((a, b) => a - b).join(' / ') + ' Hz (FSK)';
+    const uniq = [...new Set(sets)];
+    if (!uniq.length) return 'silence';
+    if (uniq.length === 1) return uniq[0] + ' Hz';
+    return (sets.length <= 6 ? sets : uniq).join(' → ') + ' Hz';
+  }
+
   const fmtS = s => (s >= 1 ? +s.toFixed(3) + ' s' : +(s * 1000).toFixed(2) + ' ms');
   const fmtF = fs => (fs && fs.length ? fs.map(f => +f.toFixed(2)).join(' + ') + ' Hz' : 'silence');
 
@@ -117,5 +133,5 @@
     return parts.join(' → ') + (entry.play === 'repeat' ? ' (repeat; cycle ' + fmtS(cycleDuration(entry)) + ')' : ' (once)');
   }
 
-  return { LIMITS, expand, normFor, cycleDuration, defaultCycles, maxCycles, clampDuration, clampCycles, freqList, describeTiming, tonesOf, fmtF, fmtS };
+  return { LIMITS, freqSummary, expand, normFor, cycleDuration, defaultCycles, maxCycles, clampDuration, clampCycles, freqList, describeTiming, tonesOf, fmtF, fmtS };
 });

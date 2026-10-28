@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="US ACTS and Canadian coin-deposit tones, greenbox coin-control tones, history of payphone coin signalling.">
+<meta name="theme-color" content="#15171a">
+<title>Payphone / Redbox · WebPhreak</title>
+<link rel="stylesheet" href="assets/css/webphreak.css">
+<script src="assets/js/refs.js" defer></script>
+<script src="assets/js/timeline.js" defer></script>
+<script src="assets/js/synth.js" defer></script>
+<script src="assets/js/wav.js" defer></script>
+<script src="assets/js/catalog.js" defer></script>
+<script src="assets/js/engine.js" defer></script>
+<script src="assets/js/ui.js" defer></script>
+</head>
+<body class="theme-red" data-page="redbox">
+<a class="skip" href="#main">Skip to content</a>
+<nav id="site-nav" aria-label="Tone groups"><a class="brand" href="index.html">WEBPHREAK</a><ul><li><a href="index.html">DTMF Keypad</a></li><li><a href="redbox.html">Payphone / Redbox</a></li><li><a href="bluebox.html">Bluebox / MF / Trunk</a></li><li><a href="progress.html">Call Progress &amp; Alerts</a></li><li><a href="lab.html">Radio, Data &amp; Test</a></li><li><a href="history.html">History &amp; Sources</a></li></ul></nav>
+<main id="main">
+<h1>Payphone / Redbox</h1>
+<p class="lede">Coin-deposit tones that older payphones sent to automated toll equipment, grouped by country, with the operator coin-control (“greenbox”) tones in the highlighted section below. Each key shows its evidence status.</p>
+<template data-intro="us-acts"><p>Automated Coin Toll Service (ACTS) listened for 1700 + 2200 Hz bursts: one for a nickel, two for a dime, five short ones for a quarter. Timings follow the Bellcore figures quoted in a patent.</p></template>
+<template data-intro="us-acts-alt"><p>Hobbyist texts from the 1980s–90s give slightly different timings (60 ms and 35 ms). They are kept as separate keys so the conflict stays visible.</p></template>
+<template data-intro="ca"><p><strong>Research items.</strong> These 2200 Hz-only definitions came from the previous version of this site. No source was found for them; a secondary source says Canadian ACTS used the US 1700 + 2200 Hz pair.</p></template>
+<template data-intro="greenbox"><p>Greenbox tones imitated signals an operator position sent to a coin line: collect the coins, return them, or ring the phone back. Each starts with a short 2600 Hz wink. Many offices actually used DC current reversal, so tones did not work everywhere.</p></template>
+<div class="board"><svg class="wires" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+<path d="M0 12 C 30 4, 40 30, 100 18" fill="none" stroke="#e05a47" stroke-width="3" vector-effect="non-scaling-stroke"/>
+<path d="M0 55 C 25 70, 60 35, 100 62" fill="none" stroke="#e8c14a" stroke-width="3" vector-effect="non-scaling-stroke"/>
+<path d="M0 88 C 40 80, 55 98, 100 84" fill="none" stroke="#4aa3e8" stroke-width="3" vector-effect="non-scaling-stroke"/>
+</svg><div data-board="redbox"></div></div>
+<details class="help" open>
+  <summary>History: red boxes, coin signalling and the decline of payphones</summary>
+  <h3>What a red box was</h3>
+  <p>Payphones on ACTS-equipped lines reported deposited coins by playing coin tones down the line. A “red box” was a device that played the same tones, so it only worked where the network trusted in-band audio from the handset (<a href="https://en.wikipedia.org/wiki/Red_box_(phreaking)" target="_blank" rel="noopener noreferrer">Wikipedia: Red box</a>). This page reproduces the sounds for listening only.</p>
+  <h3>Why it stopped working</h3>
+  <p>Secondary sources describe several changes: ACTS was phased out, carriers added filtering, and “smart” payphones moved coin validation and rating into the phone itself. Nortel’s Millennium payphones, for example, validate coins with an electronic coin mechanism in the set and do not use ACTS coin tones (<a href="https://en.wikipedia.org/wiki/Nortel_payphones" target="_blank" rel="noopener noreferrer">Wikipedia: Nortel payphones</a>; <a href="https://telephoneworld.org/pay-telephones/fortress-style-pay-phones-the-more-modern-pay-phone/northern-electric-northern-telecom-nortel-pay-phones/" target="_blank" rel="noopener noreferrer">TelephoneWorld</a>). No single model ended the technique everywhere; networks changed at different times.</p>
+  <h3>Payphones today</h3>
+  <p>US payphone numbers fell from roughly two million in the late 1990s to under about 100,000 by the mid-2010s, and in 2018 the FCC removed some payphone audit rules because so few remained (<a href="https://www.axios.com/2017/12/15/fcc-no-longer-cares-to-regulate-pay-phones-because-there-are-so-few-left-1513303183" target="_blank" rel="noopener noreferrer">Axios, 2017</a>; <a href="https://docs.fcc.gov/public/attachments/FCC-18-21A1_Rcd.pdf" target="_blank" rel="noopener noreferrer">FCC 18-21</a>). Some payphones still operate. These counts come from secondary reporting; exact FCC figures were not verified.</p>
+  <p class="evidence">Evidence for each key’s frequencies and timing is listed in its ⓘ panel. Background and evidence are kept separate: background links above are context, not proof of the values.</p>
+</details>
+</main>
+<div id="controls"><noscript><p class="notice">JavaScript is required to generate audio.</p></noscript></div>
+<footer class="site"><p>WebPhreak is a historical audio demonstration. All sound is generated locally in your browser; nothing dials, transmits or connects to a telephone or radio network. Values are labelled by evidence status; see <a href="history.html">History &amp; Sources</a>. Repository: <a href="https://github.com/djshellshoxxx/webphreak">djshellshoxxx/webphreak</a>.</p></footer>
+</body>
+</html>

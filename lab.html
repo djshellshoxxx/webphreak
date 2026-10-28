@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="CTCSS, 1750 Hz, SELCAL, five-tone, Quick Call II, Plectron, MDC1200, SAME, DSC, Kansas City Standard, CUTS and 1000/1004/1020 Hz references.">
+<meta name="theme-color" content="#15171a">
+<title>Radio, Data & Test Tones · WebPhreak</title>
+<link rel="stylesheet" href="assets/css/webphreak.css">
+<script src="assets/js/refs.js" defer></script>
+<script src="assets/js/timeline.js" defer></script>
+<script src="assets/js/synth.js" defer></script>
+<script src="assets/js/wav.js" defer></script>
+<script src="assets/js/catalog.js" defer></script>
+<script src="assets/js/engine.js" defer></script>
+<script src="assets/js/ui.js" defer></script>
+</head>
+<body class="theme-lab" data-page="lab">
+<a class="skip" href="#main">Skip to content</a>
+<nav id="site-nav" aria-label="Tone groups"><a class="brand" href="index.html">WEBPHREAK</a><ul><li><a href="index.html">DTMF Keypad</a></li><li><a href="redbox.html">Payphone / Redbox</a></li><li><a href="bluebox.html">Bluebox / MF / Trunk</a></li><li><a href="progress.html">Call Progress &amp; Alerts</a></li><li><a href="lab.html">Radio, Data &amp; Test</a></li><li><a href="callerid.html">Caller ID Decoder</a></li><li><a href="history.html">History &amp; Sources</a></li></ul></nav>
+<main id="main">
+<h1>Radio, Data &amp; Test Tones</h1>
+<p class="lede">Paging, selective calling, cassette data and measurement reference tones on the hand-wired prototype board. Data bursts marked <span class="st st-illustrative">◇ Illustrative</span> are sound demonstrations, not decodable messages.</p>
+<template data-intro="squelch"><p>Sub-audible squelch tones and the European 1750 Hz repeater burst.</p></template>
+<template data-intro="selcall"><p>Selective calling sends a tone sequence or tone pairs that only matching receivers respond to.</p></template>
+<template data-intro="radio-data"><p>Short data bursts used for unit identification. These use the documented tones and baud rates but random or placeholder content.</p></template>
+<template data-intro="alert"><p>Broadcast and marine alert audio. None of these contain a valid alert header or call, and they must not be broadcast.</p></template>
+<template data-intro="cassette"><p>1970s microcomputers stored programs on audio cassettes. The Kansas City and CUTS examples encode the bytes “HI” using the published bit format.</p></template>
+<template data-intro="test"><p>Single-frequency reference tones used for transmission measurements.</p></template>
+<div class="board"><svg class="wires" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+<path d="M0 12 C 30 4, 40 30, 100 18" fill="none" stroke="#e05a47" stroke-width="3" vector-effect="non-scaling-stroke"/>
+<path d="M0 55 C 25 70, 60 35, 100 62" fill="none" stroke="#e8c14a" stroke-width="3" vector-effect="non-scaling-stroke"/>
+<path d="M0 88 C 40 80, 55 98, 100 84" fill="none" stroke="#4aa3e8" stroke-width="3" vector-effect="non-scaling-stroke"/>
+</svg><div data-board="lab"></div></div>
+<section class="bank" aria-labelledby="h-mixer">
+  <h2 id="h-mixer">Frequency mixer</h2>
+  <p>From the 1980s tribute page: toggle up to eight frequencies on and off to build your own combination. The mix can be exported as a WAV.</p>
+  <div id="mixer"></div>
+</section>
+<details class="help" open>
+  <summary>History and help</summary>
+  <h3>Radio paging and identification</h3>
+  <p>Fire and EMS paging used sequential two-tone formats such as Motorola Quick Call II; Plectron receivers alerted volunteer firefighters (<a href="https://batlabs.com/qcii.html" target="_blank" rel="noopener noreferrer">BatLabs: Quick Call II</a>). Aircraft are called on shared HF frequencies with four-tone SELCAL codes (<a href="https://asri.aero/wp-content/uploads/2021/11/20190407-ASRI-SELCAL-Users-Guide-Rev-D.pdf" target="_blank" rel="noopener noreferrer">ASRI SELCAL guide</a>). MDC1200 and MODAT identified two-way radios with short data bursts.</p>
+  <h3>Cassette data</h3>
+  <p>The Kansas City standard came out of a 1975 BYTE symposium: 300 bit/s, with “0” as four cycles of 1200 Hz and “1” as eight cycles of 2400 Hz (<a href="https://deramp.com/swtpc.com/BYTE/Feb1976/Byte_Symposium.htm" target="_blank" rel="noopener noreferrer">BYTE, Feb. 1976</a>; <a href="https://en.wikipedia.org/wiki/Kansas_City_standard" target="_blank" rel="noopener noreferrer">Wikipedia</a>). Processor Technology’s CUTS added a 1200 bit/s mode. The Tarbell interface used a different phase-encoded scheme at about 1500 bit/s; it is not synthesized here because its manual could not be consulted (<a href="https://cdn.hackaday.io/files/1737557433933920/Tarbell%20Cassette%20Interface%20Technical%20Manual.pdf" target="_blank" rel="noopener noreferrer">Tarbell manual scan</a>).</p>
+  <h3>Test tones and calibration</h3>
+  <p>A 1000 Hz tone is an exact sub-multiple of the 8 kHz PCM sampling rate, which can bias digital level measurements; CCITT recommended 1020 Hz for digital tests and North American practice used 1004 Hz (<a href="https://stuff.mit.edu/afs/net/dev/reference/ccitt/1992/o/o6.asc" target="_blank" rel="noopener noreferrer">CCITT O.6 text</a>). Telephone “0 dBm” means one milliwatt into a 600 Ω line. Your browser and speakers are not calibrated, so these files are reference frequencies, not reference levels.</p>
+  <p class="evidence">EAS/SAME: the attention tones and AFSK parameters follow 47 CFR 11.31 (<a href="https://www.law.cornell.edu/cfr/text/47/11.31" target="_blank" rel="noopener noreferrer">LII</a>); no alert header is generated. VINSON: no official description of its sync sound is public; the key is a generic chirp.</p>
+</details>
+</main>
+<div id="controls"><noscript><p class="notice">JavaScript is required to generate audio.</p></noscript></div>
+<footer class="site"><p>WebPhreak is a historical audio demonstration. All sound is generated locally in your browser; nothing dials, transmits or connects to a telephone or radio network. Values are labelled by evidence status; see <a href="history.html">History &amp; Sources</a>. Repository: <a href="https://github.com/djshellshoxxx/webphreak">djshellshoxxx/webphreak</a>.</p></footer>
+</body>
+</html>

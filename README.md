@@ -1,130 +1,142 @@
 # WebPhreak
 
-**WebPhreak** is a free, mobile-first, browser-based interactive collection of historical telephone, signaling, radio, and audio test tones. Its visual direction combines an old metallic payphone with a hand-built electronics workbench and a historical signal laboratory.
+**WebPhreak** is a free, mobile-friendly, browser-based archive of historical telephone, signalling, radio, data-cassette and test tones. You can play every tone, read where and how it was used, see the evidence behind its frequencies and timing, and download it as a WAV file. It runs entirely in the browser as a static site on GitHub Pages.
 
-> **Status:** Experimental educational audio simulator. Tone synthesis works locally in a modern browser; advanced protocol examples are illustrative and do **not** produce validated signaling frames. GitHub Pages publication must be enabled in repository settings. This project is not a calibrated signal generator, a radio transmitter, or an emergency-alert encoder.
+**Site:** https://djshellshoxxx.github.io/webphreak/
 
-## Live pages
+> **What this is not.** It is a listening and history demonstration. Nothing here dials, transmits, injects audio into a telephone or radio network, or bypasses payment. Data examples marked *Illustrative* are not valid signalling packets, and nothing is a calibrated test instrument or an emergency transmission.
 
-| Page | Address | Purpose |
-| --- | --- | --- |
-| 16-key DTMF payphone | https://djshellshoxxx.github.io/webphreak/ | Classic telephone keypad plus A/B/C/D |
-| Hacked Numpad Prototype | https://djshellshoxxx.github.io/webphreak/prototype.html | Historic North American call-progress and MF tones |
-| Signal Laboratory | https://djshellshoxxx.github.io/webphreak/signals.html | R2, radio, alert, and maintenance-tone demonstrations |
-| Caller ID Decoder | https://djshellshoxxx.github.io/webphreak/callerid.html | Reads Bell 202 FSK caller ID audio (SDMF/MDMF) from a file or microphone |
+## Pages
 
-The addresses above assume GitHub Pages is enabled and publishing from `main` at `/ (root)`. A published site has **not** been independently verified.
+The site is organised by tone type. All pages share navigation, a volume control, **STOP ALL**, a hearing-safety note, tooltips and an info/download dialog.
 
-## Quick start
-
-Open one of the links above after enabling GitHub Pages. Alternatively, download or clone this repository and open `index.html` in a recent Chrome, Edge, Firefox or Safari browser. No installation, account, backend, npm dependencies, or network requests are required to generate the tones.
-
-Browsers generally require a click or touch before starting audio. Start with a low listening volume, especially with headphones. The volume slider on the two additional pages controls their synthesized output.
-
-### Publish on GitHub Pages
-
-1. Open https://github.com/djshellshoxxx/webphreak/settings/pages.
-2. Under **Build and deployment**, choose **Deploy from a branch**.
-3. Select **main** and **/ (root)**, then **Save**.
-4. Allow the Pages deployment to complete; check the repository **Actions** tab if the site does not appear.
-5. Visit https://djshellshoxxx.github.io/webphreak/.
-
-Changes committed to `main` should subsequently be published automatically when branch deployment is configured.
-
-## Pages and features
-
-### 1. Classic DTMF Payphone — `index.html`
-
-A responsive 4 × 4 raised-metallic-button keypad inspired by worn payphone hardware. Press and hold a key to hear two simultaneous sinusoidal frequencies. The browser keyboard is supported: digits, `*`, `#`, and `A`–`D` directly, or `Q/W/E/R` for A/B/C/D. `Enter` maps to # and `Backspace` to *. Pointer release stops the active sound. The page reports the active frequencies and can vibrate briefly on supported devices.
-
-| Row frequency | Column 1209 Hz | Column 1336 Hz | Column 1477 Hz | Column 1633 Hz |
-| --- | --- | --- | --- | --- |
-| 697 Hz | 1 | 2 (ABC) | 3 (DEF) | A |
-| 770 Hz | 4 (GHI) | 5 (JKL) | 6 (MNO) | B |
-| 852 Hz | 7 (PRS) | 8 (TUV) | 9 (WXY) | C |
-| 941 Hz | * | 0 | # | D |
-
-### 2. Hacked Numpad Prototype — `prototype.html`
-
-A dark PCB-inspired workbench with raised custom keycaps and individual signal modules. Hover, focus, or tap to read the purpose and historical use of each tone. Buttons are synthesized with the Web Audio API.
-
-| Button | Signal | Frequencies / timing | Notes |
+| Page | File | Theme | Contents |
 | --- | --- | --- | --- |
-| KP | Key Pulse | 1100 + 1700 Hz | Historical MF prefix |
-| ST | Start | 1500 + 1700 Hz | Historical MF end-of-address marker |
-| DT | Dial Tone | 350 + 440 Hz | North American dial-ready sound |
-| RT | Ringback | 440 + 480 Hz, 2 s on / 4 s off | Ringing indication |
-| BT | Busy | 480 + 620 Hz, 0.5 s on / 0.5 s off | Busy line |
-| FB | Fast Busy / Reorder | 480 + 620 Hz, 0.25 s on / 0.25 s off | Congestion or reorder |
-| SIT | Special Information Tone | 950, then 1400, then 1800 Hz | Approximate three-part sequence, not a full precision SIT variant |
-| SAS | Subscriber Alerting Signal | 440 Hz for 0.3 s | Call-waiting notification |
-| CAS | CPE Alerting Signal | 2130 + 2750 Hz for 0.09 s | Short caller-ID call-waiting alert; currently a separate button |
-| ROH | Receiver Off-Hook | 1400 + 2060 + 2450 + 2600 Hz, 0.1 s on/off | Simplified 5 Hz pulsed howler-style sound |
-| RW | Record Warning | 1400 Hz, 0.5 s every 15 s | Periodic recording notification |
-| SDT | Stutter Dial Tone | 350 + 440 Hz, 0.1 s on/off | Simplified message-waiting indication |
+| DTMF Keypad | `index.html` | Metallic payphone | 16-key DTMF (0–9, \*, #, A–D) with LCD readout, key table, AUTOVON A–D history |
+| Payphone / Redbox | `redbox.html` | Red | US ACTS coin tones, alternative hobbyist timings, Canadian research items, and a green-highlighted **Greenbox** section (coin collect / return / ringback) |
+| Bluebox / MF / Trunk | `bluebox.html` | Blue | 2600 Hz SF, MF (R1) digits, KP, ST, supplementary pairs (ST3P/Code 11, STP/Code 12, ST2P/KP2), CCITT No. 5, No. 4, all 30 R2 pairs, UK AC signalling |
+| Call Progress & Alerts | `progress.html` | Neutral | Dial, ringback, busy, reorder variants, stutter dial, SAS, CAS, call waiting, off-hook howler, recording warning, five SIT variants, CEPT and UK tones |
+| Radio, Data & Test | `lab.html` | Green PCB prototype | CTCSS, 1750 Hz, SELCAL, CCIR/ZVEI five-tone, Quick Call II, Plectron, MDC1200/MODAT/VINSON-style demos, EAS/SAME/DSC demos, Kansas City and CUTS cassette data, 1000/1004/1020 Hz references, frequency mixer |
+| History & Sources | `history.html` | Neutral | Research method, status labels, complete catalog table generated from the data, source register |
+| Caller ID Decoder | `callerid.html` | Payphone metal | Standalone Bell 202 FSK caller ID decoder (SDMF/MDMF) for an uploaded file or a microphone recording, which it asks permission for. It decodes audio you provide; it cannot generate or inject caller ID. It keeps its own self-contained code and does not use the shared tone catalog. |
 
-**Implementation distinction:** The SAS and CAS buttons are separate; CAS is not automatically appended to SAS. Cadence patterns are simplified examples, not universal exchange specifications.
+### Old addresses
 
-### 3. Historical Signal Laboratory — `signals.html`
+Earlier pages still load, so old bookmarks do not 404. Each now shows a table mapping every old key to its new key, with direct links (`page.html#tone-<id>` highlights the key):
 
-#### CCITT R2 multifrequency signaling
+| Old page | Where its keys went |
+| --- | --- |
+| `prototype.html` (Hacked Numpad Prototype) | Call Progress; KP/ST to Bluebox |
+| `signals.html` (Signal Laboratory) | R2, No. 4/5 to Bluebox; EU/UK to Call Progress; radio/alert/test to Radio, Data & Test |
+| `phreak.html` (Historical Phreak) | Coin/greenbox to Redbox; 2600/MF to Bluebox; AUTOVON A–D to DTMF |
+| `heritage.html` (Heritage Tones) | Radio, Data & Test; AC keys to Bluebox |
+| `tribute.html` (1980s Tribute, PR #1) | Keypad + LCD to DTMF; Blue Box panel to Bluebox; tone buttons to Call Progress and Redbox; mixer to Radio, Data & Test |
 
-The laboratory provides **all 15 unordered two-frequency pairs** from each six-frequency group, with one dedicated button per pair.
+## Using it
 
-- **Forward group:** 1380, 1500, 1620, 1740, 1860, 1980 Hz.
-- **Backward group:** 540, 660, 780, 900, 1020, 1140 Hz.
+- **Hold** keys (continuous tones such as DTMF, MF, dial tone): press and hold; release to stop. Keyboard: focus the key and hold Space/Enter, or use page shortcuts (DTMF page: 0–9, \*, #, A–D, Q/W/E/R; Bluebox: 0–9, K = KP, S = ST, X = 2600 Hz).
+- **Repeating cadences** (busy, ringback…): tap to start, tap again to stop.
+- **Sequences** (coin tones, SIT…): tap to play once; tap again to stop early.
+- **ⓘ Info** opens frequencies, timing, region, evidence status, notes on conflicts and changes, and source links. Desktop hover and keyboard focus show a short tooltip; every key also has the same text as its accessible description.
+- **⤓ WAV** opens the download section of the same dialog.
+- **STOP ALL** or **Esc** silences everything immediately. Sound also stops when the window loses focus, the tab is hidden, or you leave the page.
+- Audio starts only after a click, tap or key press. The default volume is 30 % on a squared taper; start low with headphones.
 
-Buttons are labeled `F12` through `F56` and `B12` through `B56`, where the two digits identify the one-based positions in the appropriate frequency group. They generate audio pairs, not a complete inter-exchange signaling protocol or call-control state machine.
+## WAV downloads
 
-#### Other signal buttons
+Every catalog entry (132 at present) has a download. Files are generated in the browser; nothing is uploaded and no microphone permission is used.
 
-| Button | Description | Behavior / limitation |
-| --- | --- | --- |
-| EAS | Emergency Alert System attention signal | 853 + 960 Hz for 8 s; audio demonstration only |
-| SAME | Specific Area Message Encoding | Alternating 1562.5 and 2083.3 Hz at approximately 520.83 symbols/s; **not** a valid encoded SAME message |
-| SELCAL | Aviation selective calling | Illustrative two simultaneous-tone pairs with a gap; **not** a verified assigned four-letter code |
-| DSC | Marine digital selective calling | Illustrative 1300/2100 Hz alternating audio at 100 baud; **not** a valid DSC packet or distress call |
-| PL | CTCSS / Private Line | Representative continuous 100 Hz subaudible squelch tone |
-| 1750 | Repeater access | 1750 Hz, 400 ms |
-| 5T | Five-tone selective calling | Illustrative 1060/1160/1270/1400/1530 Hz sequence; not a validated ZVEI, CCIR or EEA address |
-| MW | Milliwatt reference | 1004 Hz; **not** calibrated to 0 dBm into 600 ohms |
-| CN | C-notch holding tone | 1004 Hz |
-| N4 | CCITT No. 4 demonstration | 2040 + 2400 Hz |
-| N5 | CCITT No. 5 demonstration | 2400 + 2600 Hz |
-| EU | European dial tone | 425 Hz |
-| UK33 | Historical UK dial tone | 400 + 33 Hz |
-| UK50 | Historical UK dial tone | 400 + 50 Hz |
+- **Format:** RIFF/WAVE PCM, mono, 16-bit, 44.1 kHz, with correct header fields.
+- **Continuous tones:** choose 1–60 s (default 5 s).
+- **Repeating cadences:** choose a whole number of cycles (default about 10 s worth, export capped at 120 s), so the file ends after a complete cycle, including its final silence.
+- **Fixed sequences:** the complete sequence once, including all gaps.
+- **Levels:** the loudest segment of each entry peaks at −6 dBFS; relative levels between segments are preserved. A 4 ms linear fade at the start and end of each sounding run prevents clicks; it sits inside the documented duration, so on/off timing is unchanged.
+- **Names:** `webphreak_<id>[_illustrative][_<5s|3x>].wav`, lowercase ASCII only.
+- Object URLs are revoked after each download; rendering errors are reported in the dialog.
 
-### 4. Caller ID Decoder — `callerid.html`
+Playback and export use one definition: `timeline.js` expands an entry into timed events, `engine.js` schedules them with Web Audio, and `synth.js` renders them for the WAV. A browser test renders both paths and compares them (see *Testing*).
 
-A client-side Bell 202 FSK demodulator. It accepts an uploaded audio file or a live microphone recording of a caller-ID burst (the data sent in the silent interval between the first and second ring) and decodes it into date/time, number and, for MDMF, name, using a Goertzel-filter mark/space discriminator with per-byte edge resynchronization and a checksum check. It reads audio you provide; it has no line, modem, or telecom network access and cannot generate or inject a caller ID signal. It decodes what a recording contains — it does not produce a value for an arbitrary name or number. Works best on recordings at 16 kHz or higher; 8 kHz recordings decode but have little noise margin. Not validated against a hardware caller-ID receiver or a large corpus of real-world captures.
+## Research methodology and evidence labels
 
-### Interactive behavior
+Frequencies and cadences came from earlier versions of this site and from user-supplied descriptions. Those were treated as research leads, not authority, and checked against standards, regulator and manufacturer documents, patents, encyclopedias and historical hobbyist texts. Where sources conflict, the conflict stays visible: the implemented variant is named and alternatives are listed or provided as separate keys.
 
-- Pointer-down starts the signal.
-- Releasing a continuous or repeating-cadence key stops it.
-- Timed sequences run to completion after being triggered.
-- Hover, keyboard focus and tap display descriptions in a dedicated information panel.
-- Switching to a different signal stops the previous signal.
-- Losing browser focus or hiding the page stops playback.
-- The prototype and signal laboratory include a volume slider.
-- Buttons use accessible text labels, native HTML button controls and responsive grids.
+| Label | Meaning |
+| --- | --- |
+| ◐ Secondary sources | Values agree across secondary sources; the primary standard was not opened |
+| ⇄ Disputed | Sources conflict; the implemented variant and the alternative are given |
+| ≈ Approximate | Simplified or representative rendering of a real signal |
+| ? Unverified | No supporting source found; kept as a labelled research item, not deleted |
+| ◇ Illustrative | Demonstration sound only; not a valid protocol frame, code or message |
+| ✓ Verified | Checked against an opened primary document (no entry qualifies yet) |
+
+**Limits of the current research pass.** The build environment could not fetch web pages, so sources were consulted through search-engine summaries only. No primary standard (ITU-T, Telcordia, BSTJ, ETSI, ARINC, BYTE) was opened, so **no entry is marked Verified**. The source register records, for every citation, whether it was read via search summary or only identified.
+
+**Spreadsheet.** The requested reference spreadsheet (`docs.google.com/spreadsheets/d/1yR89zWc…`) could not be read: its host is blocked by the build environment's network policy. Its rows are **not** imported or reconciled. To finish this, either allow `docs.google.com` in the environment's network settings, or add an XLSX export (with hyperlinks) or a CSV including the reference-link column to the repository.
+
+Corrections made in this version, with sources, are listed in [`docs/research-notes.md`](docs/research-notes.md) and in each key's ⓘ panel.
 
 ## Architecture
 
-This project is intentionally simple and static.
+Static HTML, CSS and plain JavaScript; no framework, build step, backend, remote fonts or analytics.
 
 ```text
 webphreak/
-├── index.html        # Metallic 16-key DTMF payphone
-├── prototype.html    # PCB-style call-progress / MF board
-├── signals.html      # Historical signaling laboratory
-├── callerid.html     # Bell 202 FSK caller ID decoder (SDMF/MDMF)
-├── email2sms/        # Standalone Node service, separate from the static site (see below)
-└── README.md         # Documentation
+├── index.html, redbox.html, bluebox.html, progress.html, lab.html, history.html
+├── callerid.html        # standalone Bell 202 caller ID decoder (own inline code)
+├── prototype.html, signals.html, phreak.html, heritage.html, tribute.html   # old-address maps
+├── assets/
+│   ├── css/webphreak.css   # themes, mechanical keycaps, payphone, PCB board, dialog
+│   └── js/
+│       ├── catalog.js      # canonical tone catalog (the only place tone values live)
+│       ├── refs.js         # source register cited by catalog entries
+│       ├── timeline.js     # entry -> timed events; durations, cycles, timing text
+│       ├── synth.js        # deterministic renderer (WAV export, tests)
+│       ├── wav.js          # 16-bit PCM WAV encoder/decoder, safe filenames
+│       ├── engine.js       # Web Audio playback, look-ahead scheduler, STOP ALL, mixer
+│       └── ui.js           # nav, controls, tiles, tooltip, dialog, keyboard, tables
+├── tests/
+│   ├── unit.test.js        # node:test – catalog, timing, spectrum, clipping, WAV
+│   └── e2e.js              # Playwright – pages, input, downloads, playback/export match
+├── docs/research-notes.md  # corrections, conflicts, open research items
+└── email2sms/              # Separate Node service, not part of the static site (see below)
 ```
 
-Each page contains its own HTML, CSS and JavaScript. Sound is generated in-browser using `AudioContext`, `OscillatorNode`, and `GainNode`; no prerecorded audio is downloaded. The prototype and signal laboratory build buttons from in-page JavaScript signal definitions, and generate timed or continuous oscillator segments. The three pages link to each other with relative paths, so they work on GitHub Pages project sites and when opened locally.
+Catalog entry fields: `id`, `cat`/`sec` (page and section), `sym` (keycap label), `name`, `aliases`, `play` (`hold`/`repeat`/`once`), `synthesis` (`tones`, or `fsk` for continuous-phase data), `segments` (`{ f: [Hz…], d: seconds }`, empty `f` = silence), `region`, `status`, `about`, `notes`, `refs`, `legacy` (old page/key).
+
+Scripts are classic (non-module) files loaded with `defer`, so the site also works when opened directly from disk (`file://`). All links are relative, so it works under the `/webphreak/` project sub-path.
+
+## Running and testing locally
+
+```bash
+git clone https://github.com/djshellshoxxx/webphreak.git
+```
+
+```bash
+cd webphreak && python3 -m http.server 8000
+```
+
+Then open http://localhost:8000/. Opening `index.html` directly also works.
+
+Unit tests need only Node.js 18 or newer:
+
+```bash
+node --test tests/unit.test.js
+```
+
+Browser tests need Playwright with at least Chromium installed (`npm i -D playwright && npx playwright install chromium` if you do not have it). They serve the repository under `/webphreak/` with case-sensitive paths, like GitHub Pages:
+
+```bash
+node tests/e2e.js chromium firefox webkit
+```
+
+The e2e suite checks: every page loads without console errors, zoom is allowed and no remote fonts load; each catalog entry has exactly one key on its page; navigation and every old-page link resolve to an existing key; info dialog content and Escape; tooltip on hover and focus; hold/release by pointer, keyboard, blur, STOP ALL and Esc; repeated play/stop and voice replacement; navigating during playback; the mixer; a download for **every** entry with header, length, filename and peak checks; mobile overflow and 36 px touch targets; reduced motion. In Chromium it also renders entries through the Web Audio scheduling path in an `OfflineAudioContext` and compares them with the WAV renderer.
+
+## Limitations
+
+- Output frequency accuracy depends on the browser, operating system and sound device. Browser volume is not a calibrated electrical level, dBm or sound pressure; 0 dBm into 600 Ω explanations are historical context only.
+- Data examples (MDC1200, DSC, SAME, VINSON-style) are illustrative. The Kansas City and CUTS "HI" examples follow the published bit format but have not been tested on real hardware. Tarbell encoding is described but not synthesized.
+- Many cadences are shown in one documented variant; national and vendor variants exist.
+- Automated tests have run in headless Chromium only; Firefox and WebKit runs and real-device testing are still to do.
 
 ## email2sms (separate Node service)
 
@@ -135,39 +147,14 @@ cannot hold SMTP credentials or run a persistent server. Run it on its
 own host (Unraid Docker container, small VPS, etc.). See
 `email2sms/README.md` for setup.
 
-## Limitations and accuracy
+## Publishing
 
-- Tone frequencies are configured in hertz, but audible output accuracy depends on the operating system, sound device, browser and sample-rate conversion.
-- Browser audio output amplitude is not a calibrated electrical line level. A synthesized 1004 Hz signal cannot by itself guarantee 0 dBm at a 600-ohm load.
-- Several cadence and multi-tone patterns are approximations for listening demonstrations.
-- The SAME, DSC, SELCAL and five-tone examples are **sound demonstrations**, not valid protocol frames or verified codebooks.
-- A true four-frequency SELCAL sequence and real five-tone address encoder require code-table validation and stricter timing.
-- EAS attention audio is not an authenticated emergency message and should not be treated as one.
-- This app has no direct PSTN, radio, serial, USB, modem, or telecom network integration.
-- Visual construction on the prototype page is PCB-inspired; a fully illustrated physical hacked-numpad assembly with individual exposed wires remains a future design enhancement.
-- No automated cross-browser or physical mobile-device testing is documented yet.
-
-## Suggested roadmap
-
-1. Build a richer physical prototype appearance with visible multicolored jumper wires, exposed solder points, switches, breadboards, and a modified numpad housing.
-2. Extract shared CSS, signal definitions and Web Audio utilities to reduce duplication.
-3. Add keyboard shortcuts and optional latched playback on all pages.
-4. Add oscilloscope, spectrum display, and real-time waveform visualization.
-5. Add accurate, documented historical cadence presets and validation tests.
-6. Add selectable CTCSS standard tones and complete R2 pair labeling.
-7. Add optional protocol-valid encoders only after specifications and test vectors are reviewed.
-8. Add automated browser tests, mobile accessibility checks, and GitHub Actions deployment verification.
+Pushes to `main` publish the site. Two deployments currently run for each push: `.github/workflows/pages.yml` (uploads the repository root) and GitHub's built-in "pages build and deployment"; both succeeded for recent `main` commits. Feature branches are not published; merge to `main` to publish. Because the workflow uploads the whole repository, files such as `tests/` and `email2sms/public/index.html` are also served as static files (the email2sms server itself does not run on Pages).
 
 ## Contributing
 
-Issues and pull requests are welcome at https://github.com/djshellshoxxx/webphreak. When proposing a new signal, include its historical use, authoritative frequency references, exact cadence, and whether the result is illustrative or protocol-valid. Avoid describing simulated tones as calibrated equipment.
+Issues and pull requests are welcome at https://github.com/djshellshoxxx/webphreak. To add or correct a tone, edit `assets/js/catalog.js` (and `refs.js` for new sources), give the source and section, choose an honest status, and run both test suites.
 
 ## License
 
-No license is declared in this README. Unless the repository includes a separate LICENSE file, do not assume permission to redistribute or reuse the source under an open-source license.
-
----
-
-**Repository:** https://github.com/djshellshoxxx/webphreak
-
-**Hosting:** GitHub Pages, once enabled.
+No license file is included. Unless one is added, do not assume permission to redistribute or reuse the source.

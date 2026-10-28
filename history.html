@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Research methodology, evidence status, full tone catalog and source register for WebPhreak.">
+<meta name="theme-color" content="#15171a">
+<title>History & Sources · WebPhreak</title>
+<link rel="stylesheet" href="assets/css/webphreak.css">
+<script src="assets/js/refs.js" defer></script>
+<script src="assets/js/timeline.js" defer></script>
+<script src="assets/js/synth.js" defer></script>
+<script src="assets/js/wav.js" defer></script>
+<script src="assets/js/catalog.js" defer></script>
+<script src="assets/js/engine.js" defer></script>
+<script src="assets/js/ui.js" defer></script>
+</head>
+<body class="theme-neutral" data-page="history">
+<a class="skip" href="#main">Skip to content</a>
+<nav id="site-nav" aria-label="Tone groups"><a class="brand" href="index.html">WEBPHREAK</a><ul><li><a href="index.html">DTMF Keypad</a></li><li><a href="redbox.html">Payphone / Redbox</a></li><li><a href="bluebox.html">Bluebox / MF / Trunk</a></li><li><a href="progress.html">Call Progress &amp; Alerts</a></li><li><a href="lab.html">Radio, Data &amp; Test</a></li><li><a href="callerid.html">Caller ID Decoder</a></li><li><a href="history.html">History &amp; Sources</a></li></ul></nav>
+<main id="main">
+<h1>History &amp; Sources</h1>
+<p class="lede">How the tone values were researched, what each status label means, the complete catalog generated from the same data the players use, and every cited source.</p>
+<section class="bank" aria-labelledby="h-method">
+  <h2 id="h-method">Research methodology</h2>
+  <p>Values came from earlier versions of this site and from user-supplied descriptions, which were treated as research leads rather than authority. Each value was checked against standards, manufacturer or regulator documents, patents, encyclopedias and historical hobbyist texts. Conflicts are kept visible rather than averaged away. Corrections and open items are listed in the <a href="https://github.com/djshellshoxxx/webphreak/blob/main/docs/research-notes.md">research notes</a>.</p>
+  <p class="notice"><strong>Limits of this pass.</strong> The build environment could not fetch web pages, so sources were consulted through search-engine summaries only, and no primary standard (ITU-T, Telcordia, BSTJ, ETSI, ARINC) was opened. For that reason no entry is marked “Verified”. The requested source spreadsheet could not be read either (its host was blocked), so its rows are <strong>not</strong> reconciled here.</p>
+  <ul>
+    <li><span class="st st-secondary">◐ Secondary sources</span> values agree across secondary sources.</li>
+    <li><span class="st st-disputed">⇄ Disputed</span> sources conflict; the implemented variant and the alternative are listed.</li>
+    <li><span class="st st-approximate">≈ Approximate</span> simplified rendering of a real signal.</li>
+    <li><span class="st st-unverified">? Unverified</span> no supporting source found; kept as a research item.</li>
+    <li><span class="st st-illustrative">◇ Illustrative</span> demonstration sound only; not a valid protocol frame, code or message.</li>
+  </ul>
+</section>
+<section class="bank" aria-labelledby="h-cat">
+  <h2 id="h-cat">Complete tone catalog</h2>
+  <div class="tablewrap"><table id="catalog-table"></table></div>
+</section>
+<section class="bank" aria-labelledby="h-refs">
+  <h2 id="h-refs">Source register</h2>
+  <p>“search-summary” means the source was found and its summary read; “not-opened” means the document was identified but its text was not read.</p>
+  <div id="ref-table"></div>
+</section>
+</main>
+<div id="controls"><noscript><p class="notice">JavaScript is required to generate audio.</p></noscript></div>
+<footer class="site"><p>WebPhreak is a historical audio demonstration. All sound is generated locally in your browser; nothing dials, transmits or connects to a telephone or radio network. Values are labelled by evidence status; see <a href="history.html">History &amp; Sources</a>. Repository: <a href="https://github.com/djshellshoxxx/webphreak">djshellshoxxx/webphreak</a>.</p></footer>
+</body>
+</html>

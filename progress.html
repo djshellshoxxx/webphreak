@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Dial, ringback, busy, reorder, stutter dial, SIT, call waiting, off-hook and recording warning tones; European and UK variants.">
+<meta name="theme-color" content="#15171a">
+<title>Call Progress & Alerts · WebPhreak</title>
+<link rel="stylesheet" href="assets/css/webphreak.css">
+<script src="assets/js/refs.js" defer></script>
+<script src="assets/js/timeline.js" defer></script>
+<script src="assets/js/synth.js" defer></script>
+<script src="assets/js/wav.js" defer></script>
+<script src="assets/js/catalog.js" defer></script>
+<script src="assets/js/engine.js" defer></script>
+<script src="assets/js/ui.js" defer></script>
+</head>
+<body class="theme-neutral" data-page="progress">
+<a class="skip" href="#main">Skip to content</a>
+<nav id="site-nav" aria-label="Tone groups"><a class="brand" href="index.html">WEBPHREAK</a><ul><li><a href="index.html">DTMF Keypad</a></li><li><a href="redbox.html">Payphone / Redbox</a></li><li><a href="bluebox.html">Bluebox / MF / Trunk</a></li><li><a href="progress.html">Call Progress &amp; Alerts</a></li><li><a href="lab.html">Radio, Data &amp; Test</a></li><li><a href="callerid.html">Caller ID Decoder</a></li><li><a href="history.html">History &amp; Sources</a></li></ul></nav>
+<main id="main">
+<h1>Call Progress &amp; Alerts</h1>
+<p class="lede">Tones that tell a caller what the network is doing. Continuous tones play while held; cadences start and stop with a tap; sequences play once.</p>
+<template data-intro="na"><p>The North American “precise tone plan” built tones from 350, 440, 480 and 620 Hz. Reorder timing varied historically; the variants are listed.</p></template>
+<template data-intro="na-alert"><p>In-call alerts and warnings. SAS and CAS are separate keys: CAS is not appended to SAS automatically.</p></template>
+<template data-intro="sit"><p>Special information tones precede recorded announcements. The three-segment pattern encodes the reason; variant names differ between sources.</p></template>
+<template data-intro="eu"><p>Many European networks use a single 425 Hz frequency with different cadences. National plans vary.</p></template>
+<template data-intro="uk"><p>Modern UK tones, plus legacy low-frequency dial tones kept from the previous site with a disputed label.</p></template>
+<div class="board"><svg class="wires" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+<path d="M0 12 C 30 4, 40 30, 100 18" fill="none" stroke="#e05a47" stroke-width="3" vector-effect="non-scaling-stroke"/>
+<path d="M0 55 C 25 70, 60 35, 100 62" fill="none" stroke="#e8c14a" stroke-width="3" vector-effect="non-scaling-stroke"/>
+<path d="M0 88 C 40 80, 55 98, 100 84" fill="none" stroke="#4aa3e8" stroke-width="3" vector-effect="non-scaling-stroke"/>
+</svg><div data-board="progress"></div></div>
+<details class="help" open>
+  <summary>History and help</summary>
+  <h3>Precise tone plan</h3>
+  <p>Before the 1960s–70s, North American dial and busy tones varied by exchange. AT&amp;T’s precise tone plan standardized combinations of four frequencies so that machines and people could recognize them reliably (<a href="https://en.wikipedia.org/wiki/Precise_tone_plan" target="_blank" rel="noopener noreferrer">Wikipedia: Precise tone plan</a>; <a href="https://en.wikipedia.org/wiki/Call-progress_tone" target="_blank" rel="noopener noreferrer">Call-progress tone</a>).</p>
+  <h3>SIT and call screening</h3>
+  <p>SIT tones let automatic dialers detect intercepts. Some consumer products played a SIT at the start of a call to make autodialers hang up (<a href="https://en.wikipedia.org/wiki/Special_information_tone" target="_blank" rel="noopener noreferrer">Wikipedia: SIT</a>).</p>
+  <p class="evidence">The receiver off-hook howler is played at your chosen volume only; real exchanges raised its level. Recording-warning intervals vary by vendor.</p>
+</details>
+</main>
+<div id="controls"><noscript><p class="notice">JavaScript is required to generate audio.</p></noscript></div>
+<footer class="site"><p>WebPhreak is a historical audio demonstration. All sound is generated locally in your browser; nothing dials, transmits or connects to a telephone or radio network. Values are labelled by evidence status; see <a href="history.html">History &amp; Sources</a>. Repository: <a href="https://github.com/djshellshoxxx/webphreak">djshellshoxxx/webphreak</a>.</p></footer>
+</body>
+</html>

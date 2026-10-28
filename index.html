@@ -1,11 +1,47 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#303236"><title>WebPhreak · DTMF Payphone</title>
-<style>
-*{box-sizing:border-box}body{margin:0;min-height:100dvh;display:grid;place-items:center;background:radial-gradient(ellipse at top,#44484c,#17191b);font-family:Arial,sans-serif;color:#eee;touch-action:manipulation}.phone{width:min(96vw,450px);padding:26px 20px 32px;border:2px solid #64686a;border-radius:20px;background:repeating-linear-gradient(0deg,#424549 0px,#3c3e42 2px,#494c4e 4px);box-shadow:inset 0 2px 4px #aaa5,0 18px 50px #0009}.head{text-align:center;margin-bottom:22px}.head h1{font-size:1.4rem;letter-spacing:.22em;margin:0 0 7px}.head small{color:#c4c6c7}.keys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.key{position:relative;min-height:clamp(65px,18vw,86px);padding:7px 0;border:3px solid #191b1e;border-radius:14px;background:linear-gradient(135deg,#e0e2df 0%,#9c9fa1 22%,#777b7e 55%,#b8babc 85%,#62676a 100%);color:#151617;text-shadow:0 1px 1px #fff7;box-shadow:inset 2px 3px 3px #fff8,inset -3px -4px 5px #0006,0 5px 0 #17191b,0 7px 6px #0009;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;touch-action:none}.key strong{font-size:clamp(28px,8vw,43px);line-height:1;font-weight:900}.key span{font-size:clamp(10px,3vw,15px);font-weight:900;min-height:1em}.key:active,.key.active{transform:translateY(4px);box-shadow:inset 2px 3px 6px #0007,0 1px 0 #111;background:linear-gradient(135deg,#777,#aeb1b1 55%,#666)}.key.aux{background:linear-gradient(135deg,#bec3c6,#787d81 60%,#4d5357)}.status{text-align:center;margin-top:22px;font-size:.8rem;color:#c7c8c9;min-height:1.3em}.foot{text-align:center;font-size:.72rem;color:#aeb0b2;margin-top:10px}@media(max-width:360px){.phone{padding:18px 12px}.keys{gap:8px}}
-</style></head><body><main class="phone"><nav style="display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:16px;font-size:13px"><a style="color:#fff" href="./prototype.html">Prototype Board</a><a style="color:#fff" href="./signals.html">Signal Laboratory</a><a style="color:#fff" href="./phreak.html">Historical Phreak</a><a style="color:#fff" href="./heritage.html">Heritage Tones</a><a style="color:#fff" href="./callerid.html">Caller ID Decoder</a></nav><header class="head"><h1>WEBPHREAK</h1><small>16-TONE DTMF PAYPHONE</small></header><div class="keys" id="keys"></div><div class="status" id="status" aria-live="polite">Tap or hold a key to play its tone</div><div class="foot">Dual-tone multifrequency · 697–1633 Hz</div></main>
-<script>
-const rows=[697,770,852,941],cols=[1209,1336,1477,1633],layout=[['1','2','3','A'],['4','5','6','B'],['7','8','9','C'],['*','0','#','D']],letters={'2':'ABC','3':'DEF','4':'GHI','5':'JKL','6':'MNO','7':'PRS','8':'TUV','9':'WXY','0':'OPER'};let ctx,active=null;const grid=document.getElementById('keys'),status=document.getElementById('status');const map={};layout.forEach((row,r)=>row.forEach((key,c)=>{const b=document.createElement('button');b.type='button';b.className='key'+(c===3?' aux':'');b.innerHTML='<strong>'+key+'</strong><span>'+(letters[key]||'&nbsp;')+'</span>';b.setAttribute('aria-label',key+' '+rows[r]+' and '+cols[c]+' hertz');grid.appendChild(b);map[key]={b,frequencies:[rows[r],cols[c]]};b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);start(key)});b.addEventListener('pointerup',stop);b.addEventListener('pointercancel',stop);b.addEventListener('lostpointercapture',stop)}));
-function start(key){if(active?.key===key)return;stop();const item=map[key];if(!item)return;try{ctx??=new(window.AudioContext||window.webkitAudioContext)();ctx.resume();const gain=ctx.createGain();gain.gain.setValueAtTime(0,ctx.currentTime);gain.gain.linearRampToValueAtTime(.16,ctx.currentTime+.008);gain.connect(ctx.destination);const oscillators=item.frequencies.map(f=>{const o=ctx.createOscillator();o.type='sine';o.frequency.value=f;o.connect(gain);o.start();return o});active={key,gain,oscillators};item.b.classList.add('active');status.textContent=key+' · '+item.frequencies.join(' + ')+' Hz';if(navigator.vibrate)navigator.vibrate(12)}catch(e){status.textContent='Audio unavailable: '+e.message}}
-function stop(){if(!active)return;const {key,gain,oscillators}=active;active=null;map[key].b.classList.remove('active');const now=ctx.currentTime;gain.gain.cancelScheduledValues(now);gain.gain.setTargetAtTime(0,now,.008);oscillators.forEach(o=>{o.stop(now+.06)});status.textContent='Tap or hold a key to play its tone'}
-const keyboard={'q':'A','w':'B','e':'C','r':'D','Enter':'#','Backspace':'*'};document.addEventListener('keydown',e=>{if(e.repeat)return;const k=keyboard[e.key]||e.key.toUpperCase();if(map[k]){e.preventDefault();start(k)}});document.addEventListener('keyup',e=>{const k=keyboard[e.key]||e.key.toUpperCase();if(active?.key===k)stop()});window.addEventListener('blur',stop);document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()});
-</script></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Metallic 16-key DTMF payphone keypad with A-D keys, tone details and WAV downloads.">
+<meta name="theme-color" content="#15171a">
+<title>DTMF Payphone Keypad · WebPhreak</title>
+<link rel="stylesheet" href="assets/css/webphreak.css">
+<script src="assets/js/refs.js" defer></script>
+<script src="assets/js/timeline.js" defer></script>
+<script src="assets/js/synth.js" defer></script>
+<script src="assets/js/wav.js" defer></script>
+<script src="assets/js/catalog.js" defer></script>
+<script src="assets/js/engine.js" defer></script>
+<script src="assets/js/ui.js" defer></script>
+</head>
+<body class="theme-payphone" data-page="dtmf">
+<a class="skip" href="#main">Skip to content</a>
+<nav id="site-nav" aria-label="Tone groups"><a class="brand" href="index.html">WEBPHREAK</a><ul><li><a href="index.html">DTMF Keypad</a></li><li><a href="redbox.html">Payphone / Redbox</a></li><li><a href="bluebox.html">Bluebox / MF / Trunk</a></li><li><a href="progress.html">Call Progress &amp; Alerts</a></li><li><a href="lab.html">Radio, Data &amp; Test</a></li><li><a href="callerid.html">Caller ID Decoder</a></li><li><a href="history.html">History &amp; Sources</a></li></ul></nav>
+<main id="main">
+<h1>DTMF Payphone Keypad</h1>
+<p class="lede">Press and hold a key to hear its two simultaneous frequencies. Keyboard: 0–9, <kbd>*</kbd>, <kbd>#</kbd>, <kbd>A</kbd>–<kbd>D</kbd> (or <kbd>Q W E R</kbd> for A–D). <kbd>Esc</kbd> stops all sound.</p>
+<section class="phone" aria-label="Payphone keypad">
+  <div class="head"><strong>WEBPHREAK</strong><small>16-TONE DTMF PAYPHONE</small></div>
+  <div class="lcd" aria-live="off"><div id="lcd-digits">READY</div><div id="lcd-freq">— Hz</div><button type="button" id="lcd-clear" aria-label="Clear display">CLR</button></div>
+  <div class="pad" id="payphone-keys" role="group" aria-label="DTMF keys"></div>
+  <p class="foot">Rows 697 · 770 · 852 · 941 Hz &nbsp;×&nbsp; columns 1209 · 1336 · 1477 · 1633 Hz</p>
+</section>
+<section class="bank" aria-labelledby="h-table">
+  <h2 id="h-table">Key details and WAV downloads</h2>
+  <p>Each row's ⓘ button opens frequencies, timing, sources and status; ⤓ exports a WAV (continuous tone, default 5 s).</p>
+  <div class="tablewrap"><table id="dtmf-table"></table></div>
+</section>
+<details class="help" open>
+  <summary>History and help</summary>
+  <h3>Touch-Tone</h3>
+  <p>Dual-tone multi-frequency (DTMF) signalling replaced rotary-dial pulses on subscriber lines from the 1960s. Each key sends one tone from a low group and one from a high group; the combination is internationally standardized in ITU-T Q.23 (<a href="https://www.itu.int/rec/T-REC-Q.23/en" target="_blank" rel="noopener noreferrer">ITU-T Q.23</a>; overview: <a href="https://en.wikipedia.org/wiki/Dual-tone_multi-frequency_signaling" target="_blank" rel="noopener noreferrer">Wikipedia</a>).</p>
+  <h3>The fourth column and AUTOVON</h3>
+  <p>The 1633 Hz column (A, B, C, D) is missing from ordinary phones. On the US military AUTOVON network those keys selected call precedence: A Flash Override, B Flash, C Immediate, D Priority (<a href="https://glossary.atis.org/?p=8500" target="_blank" rel="noopener noreferrer">ATIS glossary</a>, <a href="https://en.wikipedia.org/wiki/Autovon" target="_blank" rel="noopener noreferrer">Wikipedia: Autovon</a>). They are still DTMF subscriber tones; they are <strong>not</strong> the MF trunk tones on the <a href="bluebox.html">Bluebox / MF</a> page, which use a different 700–1700 Hz frequency set.</p>
+  <p class="evidence">Evidence status: the frequency matrix is consistent across secondary sources; ITU-T Q.23 itself was not opened in this research pass, so entries are marked “secondary”.</p>
+</details>
+</main>
+<div id="controls"><noscript><p class="notice">JavaScript is required to generate audio.</p></noscript></div>
+<footer class="site"><p>WebPhreak is a historical audio demonstration. All sound is generated locally in your browser; nothing dials, transmits or connects to a telephone or radio network. Values are labelled by evidence status; see <a href="history.html">History &amp; Sources</a>. Repository: <a href="https://github.com/djshellshoxxx/webphreak">djshellshoxxx/webphreak</a>.</p></footer>
+</body>
+</html>

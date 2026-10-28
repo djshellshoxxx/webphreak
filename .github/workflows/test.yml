@@ -18,5 +18,5 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - name: Unit tests (catalog, timing, spectrum, WAV)
-        run: node --test tests/unit.test.js
+      - name: Unit tests (catalog, timing, spectrum, WAV, formulas)
+        run: node --test tests/unit.test.js tests/formula.test.js

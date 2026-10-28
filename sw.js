@@ -6,13 +6,13 @@
  * Bump VERSION when the PRECACHE list changes.
  */
 'use strict';
-const VERSION = 'webphreak-v1';
+const VERSION = 'webphreak-v2';
 const PRECACHE = [
-  './', 'index.html', 'redbox.html', 'bluebox.html', 'progress.html', 'lab.html', 'decode.html', 'callerid.html', 'history.html',
+  './', 'index.html', 'redbox.html', 'bluebox.html', 'progress.html', 'lab.html', 'compose.html', 'decode.html', 'callerid.html', 'history.html',
   'prototype.html', 'signals.html', 'phreak.html', 'heritage.html', 'tribute.html',
   'manifest.webmanifest', 'assets/css/webphreak.css',
   'assets/js/refs.js', 'assets/js/timeline.js', 'assets/js/synth.js', 'assets/js/wav.js', 'assets/js/catalog.js',
-  'assets/js/engine.js', 'assets/js/detect.js', 'assets/js/scope.js', 'assets/js/rotary.js', 'assets/js/decoder.js', 'assets/js/ui.js',
+  'assets/js/engine.js', 'assets/js/detect.js', 'assets/js/scope.js', 'assets/js/rotary.js', 'assets/js/decoder.js', 'assets/js/formula.js', 'assets/js/formula-examples.js', 'assets/js/composer.js', 'assets/js/ui.js',
   'assets/icons/icon.svg', 'assets/icons/icon-192.png', 'assets/icons/icon-512.png'
 ];
 

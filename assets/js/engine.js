@@ -190,7 +190,22 @@
       v.timers.push(setInterval(pump, TICK_MS));
     } else {
       const tl = TL.expand(entry);
-      scheduleEvents(ctx, v.out, tl, tl.events, t0, tr);
+      if (tl.synthesis === 'tones' && tl.events.length > 200) {
+        // Long sequences (e.g. tone formulas): schedule a window ahead, like cadences,
+        // so thousands of steps never create thousands of oscillators at once.
+        let idx = 0;
+        const pump = () => {
+          if (v.stopped) return;
+          const horizon = ctx.currentTime + LOOKAHEAD - t0;
+          let j = idx;
+          while (j < tl.events.length && tl.events[j].t < horizon) j++;
+          if (j > idx) { scheduleEvents(ctx, v.out, tl, tl.events.slice(idx, j), t0, tr); idx = j; }
+        };
+        pump();
+        v.timers.push(setInterval(pump, TICK_MS));
+      } else {
+        scheduleEvents(ctx, v.out, tl, tl.events, t0, tr);
+      }
       v.timers.push(setTimeout(finish, (t0 - ctx.currentTime + tl.duration) * 1000 + 40));
     }
     emit('start', entry);

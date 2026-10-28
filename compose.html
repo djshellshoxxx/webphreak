@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Arrange any WebPhreak tone, raw frequencies and silences into timed sequences with a calculator-style formula editor; play, save, share and export WAV.">
+<meta name="theme-color" content="#15171a">
+<title>Tone Calculator · WebPhreak</title>
+<link rel="stylesheet" href="assets/css/webphreak.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+<script src="assets/js/refs.js" defer></script>
+<script src="assets/js/timeline.js" defer></script>
+<script src="assets/js/synth.js" defer></script>
+<script src="assets/js/wav.js" defer></script>
+<script src="assets/js/catalog.js" defer></script>
+<script src="assets/js/engine.js" defer></script>
+<script src="assets/js/detect.js" defer></script>
+<script src="assets/js/scope.js" defer></script>
+<script src="assets/js/formula.js" defer></script>
+<script src="assets/js/formula-examples.js" defer></script>
+<script src="assets/js/composer.js" defer></script>
+<script src="assets/js/ui.js" defer></script>
+</head>
+<body class="theme-neutral" data-page="compose">
+<a class="skip" href="#main">Skip to content</a>
+<nav id="site-nav" aria-label="Tone groups"><a class="brand" href="index.html">WEBPHREAK</a><ul><li><a href="index.html">DTMF Keypad</a></li><li><a href="redbox.html">Payphone / Redbox</a></li><li><a href="bluebox.html">Bluebox / MF / Trunk</a></li><li><a href="progress.html">Call Progress &amp; Alerts</a></li><li><a href="lab.html">Radio, Data &amp; Test</a></li><li><a href="compose.html">Tone Calculator</a></li><li><a href="decode.html">Tone Decoder</a></li><li><a href="callerid.html">Caller ID Decoder</a></li><li><a href="history.html">History &amp; Sources</a></li></ul></nav>
+<main id="main">
+<h1>Tone Calculator</h1>
+<p class="lede">Arrange any tone on this site, raw frequencies and silences into a sequence, with exact timing. Type a formula into the display or build it with the keys, then play it, save it, share it or download it as a WAV. Hover or focus any key for help.</p>
+<div id="composer"></div>
+<details class="help" open>
+  <summary>Formula syntax</summary>
+  <p>A formula is a list of things to play, one after another. <code>+</code>, commas, spaces and new lines all mean “then”. Anything after <code>//</code> on a line is a comment.</p>
+  <div class="tablewrap"><table class="syntax">
+    <thead><tr><th scope="col">Write</th><th scope="col">Meaning</th><th scope="col">Example</th></tr></thead>
+    <tbody>
+      <tr><td><code>#411</code></td><td>Key presses: each character is one press (DTMF keys by default)</td><td><code>DT@2s 1s #411</code></td></tr>
+      <tr><td><code>@</code> <i>time</i></td><td>How long the tone before it sounds. Units <code>ms</code> or <code>s</code>; no unit means ms. Default 500 ms</td><td><code>5@2s</code>, <code>2600Hz@2ms</code>, <code>1@80</code></td></tr>
+      <tr><td><i>time</i> alone</td><td>Silence. You may add <code>Si</code>, or write <code>Si@</code><i>time</i>, <code>_@</code><i>time</i> or <code>rest@</code><i>time</i></td><td><code>50ms</code>, <code>1sSi</code>, <code>Si@250ms</code></td></tr>
+      <tr><td><code>KP</code>, <code>DT</code>, <code>[MF 1]</code></td><td>Any catalog tone by its key label, alias, id or name. Use square brackets when the name has spaces or starts with a digit</td><td><code>Dialtone</code>, <code>[acts-quarter]</code>, <code>[2600]</code></td></tr>
+      <tr><td><i>n</i><code>Hz</code></td><td>A raw sine frequency, 1–20000 Hz (<code>kHz</code> also works)</td><td><code>440Hz</code>, <code>1.2kHz@100ms</code></td></tr>
+      <tr><td><code>&amp;</code></td><td>Stack: sound things together. Works with frequencies, single keys and steady tones</td><td><code>697Hz&amp;1209Hz</code> (= DTMF 1), <code>1&amp;5</code></td></tr>
+      <tr><td><code>%</code><i>n</i></td><td>Relative level (0–100) of one tone</td><td><code>697Hz%60&amp;1209Hz</code></td></tr>
+      <tr><td><i>N</i><code>( … )</code> or <code>( … )x</code><i>N</i></td><td>Repeat a group N times (up to 10000)</td><td><code>10(2600Hz@2ms 2ms)</code>, <code>(1 50ms)x3</code></td></tr>
+      <tr><td><code>( … )@</code><i>time</i></td><td>Default tone length for everything in the group</td><td><code>(KP 121 ST)@68ms</code></td></tr>
+      <tr><td><code>tone=</code> <code>gap=</code> <code>level=</code></td><td>Settings for everything after them: default press length, automatic silence between tones, overall level</td><td><code>tone=70ms gap=70ms level=80%</code></td></tr>
+      <tr><td><code>keys=dtmf|mf|pulse</code></td><td>What digits mean: keypad tones, MF trunk tones or rotary-dial clicks</td><td><code>keys=mf KP 1212 ST</code></td></tr>
+      <tr><td><code>$name = …</code></td><td>A variable, on its own line. Use it later as <code>$name</code></td><td><code>$num = 5551212</code> then <code>DT@1s $num</code></td></tr>
+    </tbody>
+  </table></div>
+  <h3>Good to know</h3>
+  <ul>
+    <li>Tones that already have their own rhythm, such as busy (<code>BT</code>) or ringback, repeat to fill the length you give them, cutting the last cycle. Fixed sequences such as coin tones or SIT keep their own timing.</li>
+    <li>Stacked tones are mixed at equal level unless you use <code>%</code>. The loudest moment of the whole formula is scaled to −6 dBFS for playback and WAV export.</li>
+    <li>Every tone gets 4 ms fades (or half its length if shorter) to avoid clicks, inside its stated time.</li>
+    <li>Limits: 120 seconds and 20,000 steps per formula. Data bursts (SAME, MDC1200…) cannot be sequenced.</li>
+    <li>Saved formulas stay in this browser. <strong>🔗 LINK</strong> puts the formula into the page address so you can share it; nothing is uploaded.</li>
+  </ul>
+  <p class="evidence">This tool arranges sounds for listening and audio files. It has no connection to any telephone line or radio. Historical trunk tones (2600 Hz, MF, coin tones) have no effect on modern networks.</p>
+</details>
+</main>
+<div id="controls"><noscript><p class="notice">JavaScript is required to generate audio.</p></noscript></div>
+<footer class="site"><p>WebPhreak is a historical audio demonstration. All sound is generated locally in your browser; nothing dials, transmits or connects to a telephone or radio network. Values are labelled by evidence status; see <a href="history.html">History &amp; Sources</a>. Repository: <a href="https://github.com/djshellshoxxx/webphreak">djshellshoxxx/webphreak</a>.</p></footer>
+</body>
+</html>

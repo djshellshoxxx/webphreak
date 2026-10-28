@@ -17,6 +17,7 @@ The site is organised by tone type. All pages share navigation, a volume control
 | Bluebox / MF / Trunk | `bluebox.html` | Blue | 2600 Hz SF, MF (R1) digits, KP, ST, supplementary pairs (ST3P/Code 11, STP/Code 12, ST2P/KP2), CCITT No. 5, No. 4, all 30 R2 pairs, UK AC signalling |
 | Call Progress & Alerts | `progress.html` | Neutral | Dial, ringback, busy, reorder variants, stutter dial, SAS, CAS, call waiting, off-hook howler, recording warning, five SIT variants, CEPT and UK tones |
 | Radio, Data & Test | `lab.html` | Green PCB prototype | CTCSS, 1750 Hz, SELCAL, CCIR/ZVEI five-tone, Quick Call II, Plectron, MDC1200/MODAT/VINSON-style demos, EAS/SAME/DSC demos, Kansas City and CUTS cassette data, 1000/1004/1020 Hz references, frequency mixer |
+| Tone Calculator | `compose.html` | Payphone metal | Calculator-style sequencer: type or key in a **tone formula** that arranges any catalog tone, raw frequencies, stacked tones and silences with exact timing; live timeline, play, WAV export, saved formulas (this browser), JSON import/export, share links and 14 examples |
 | Tone Decoder | `decode.html` | Neutral | Recognizes DTMF, MF, 2600 Hz, ACTS coin bursts and dial/busy/ringback pairs in a catalog sample, an audio file you choose, or the microphone (opt-in, live, nothing recorded) |
 | History & Sources | `history.html` | Neutral | Research method, status labels, complete catalog table generated from the data, source register |
 | Caller ID Decoder | `callerid.html` | Payphone metal | Standalone Bell 202 FSK caller ID decoder (SDMF/MDMF) for an uploaded file or a microphone recording, which it asks permission for. It decodes audio you provide; it cannot generate or inject caller ID. It keeps its own self-contained code and does not use the shared tone catalog. |
@@ -45,6 +46,24 @@ Earlier pages still load, so old bookmarks do not 404. Each now shows a table ma
 - **Install / offline:** the site is an installable web app. After one visit every page works offline (Chromium shows an “⤓ Install app” button; on iOS use Share → Add to Home Screen).
 - **STOP ALL** or **Esc** silences everything immediately. Sound also stops when the window loses focus, the tab is hidden, or you leave the page.
 - Audio starts only after a click, tap or key press. The default volume is 30 % on a squared taper; start low with headphones.
+
+## Tone formulas (Tone Calculator)
+
+`compose.html` compiles a small formula language (`assets/js/formula.js`) into the same segment list used for playback and WAV export. `+`, commas, spaces and new lines all mean “then”.
+
+| Write | Meaning |
+| --- | --- |
+| `#411` | key presses, one per character (DTMF unless `keys=mf` or `keys=pulse`) |
+| `5@2s`, `2600Hz@2ms`, `1@80` | `@` sets how long a tone sounds (no unit = ms; default 500 ms) |
+| `50ms`, `1sSi`, `Si@250ms` | silence |
+| `KP`, `DT`, `Dialtone`, `[MF 1]`, `[acts-quarter]` | catalog tones by label, alias, id or name |
+| `440Hz`, `1.2kHz` | raw sine frequencies |
+| `697Hz&1209Hz`, `1&5`, `1209Hz%70` | `&` stacks tones together; `%` sets a relative level |
+| `10(2600Hz@2ms 2ms)`, `(1 50ms)x3`, `(KP 121 ST)@68ms` | repeats; `@` after a group sets its default tone length |
+| `tone=70ms gap=50ms keys=mf level=80%` | settings for everything after them |
+| `$num = 5551212` … `$num` | variables (one per line) |
+
+Errors are reported with line and column, and clicking the message selects the problem (for example `2600mhz` → “Did you mean 2600Hz?”). Limits: 120 s and 20,000 steps per formula. Data bursts cannot be sequenced.
 
 ## WAV downloads
 
@@ -86,7 +105,7 @@ Static HTML, CSS and plain JavaScript; no framework, build step, backend, remote
 
 ```text
 webphreak/
-├── index.html, redbox.html, bluebox.html, progress.html, lab.html, decode.html, history.html
+├── index.html, redbox.html, bluebox.html, progress.html, lab.html, compose.html, decode.html, history.html
 ├── callerid.html        # standalone Bell 202 caller ID decoder (own inline code)
 ├── prototype.html, signals.html, phreak.html, heritage.html, tribute.html   # old-address maps
 ├── assets/
@@ -102,6 +121,9 @@ webphreak/
 │       ├── scope.js        # oscilloscope / spectrum / live readout panel
 │       ├── rotary.js       # draggable rotary dial
 │       ├── decoder.js      # decode.html: catalog sample, file and microphone inputs
+│       ├── formula.js      # tone formula parser/compiler (pure, unit-tested)
+│       ├── formula-examples.js  # built-in example formulas
+│       ├── composer.js     # compose.html: the Tone Calculator UI
 │       └── ui.js           # nav, controls, tiles, tooltip, dialog, keyboard, tables
 │   └── icons/              # app icons (SVG + 192/512 PNG)
 ├── manifest.webmanifest, sw.js  # installable app + offline cache (network first, cache fallback)
@@ -131,7 +153,7 @@ Then open http://localhost:8000/. Opening `index.html` directly also works.
 Unit tests need only Node.js 18 or newer:
 
 ```bash
-node --test tests/unit.test.js
+node --test tests/unit.test.js tests/formula.test.js
 ```
 
 Browser tests need Playwright with at least Chromium installed (`npm i -D playwright && npx playwright install chromium` if you do not have it). They serve the repository under `/webphreak/` with case-sensitive paths, like GitHub Pages:

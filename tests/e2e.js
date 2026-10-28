@@ -13,7 +13,7 @@ const catalog = require('../assets/js/catalog.js');
 const ROOT = path.resolve(__dirname, '..');
 const BASE_PATH = '/webphreak/'; // mimic the GitHub Pages project sub-path
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
-const PAGES = ['index', 'redbox', 'bluebox', 'progress', 'lab', 'decode', 'history', 'prototype', 'signals', 'phreak', 'heritage', 'tribute'];
+const PAGES = ['index', 'redbox', 'bluebox', 'progress', 'lab', 'compose', 'decode', 'history', 'prototype', 'signals', 'phreak', 'heritage', 'tribute'];
 const CAT_PAGE = { dtmf: 'index', redbox: 'redbox', bluebox: 'bluebox', progress: 'progress', lab: 'lab' };
 
 function serve() {
@@ -33,7 +33,7 @@ function serve() {
 const results = [];
 async function check(name, fn) {
   try { await fn(); results.push(['ok', name]); console.log('ok   ' + name); }
-  catch (e) { results.push(['FAIL', name, e]); console.log('FAIL ' + name + '\n     ' + (e.stack || e).toString().split('\n').slice(0, 4).join('\n     ')); }
+  catch (e) { results.push(['FAIL', name, e]); console.log('FAIL ' + name + '\n     ' + (e.stack || e).toString().split('\n').slice(0, process.env.E2E_DEBUG ? 40 : 4).join('\n     ')); }
 }
 
 async function run(browserName, base) {
@@ -304,6 +304,53 @@ async function run(browserName, base) {
     await page.setInputFiles('#dec-file', { name: 'digits.wav', mimeType: 'audio/wav', buffer: Buffer.from(wav.encode(x, 22050)) });
     await page.waitForFunction(() => /digits\.wav/.test(document.querySelector('#dec-results').textContent), null, { timeout: 5000 });
     assert.match(await page.locator('.dec-summary').innerText(), /DTMF 1 2 3/);
+  });
+
+  await check(tag('tone calculator: type, build with keys, errors, play, WAV, save/load, link, examples'), async () => {
+    await page.goto(base + 'compose.html');
+    await page.evaluate(() => localStorage.removeItem('webphreak.formulas'));
+    const status = () => page.locator('#calc-status').innerText();
+    await page.fill('#formula', '10(2600mhz@2ms+2msSi)');
+    await page.waitForFunction(() => /Did you mean 2600Hz/.test(document.querySelector('#calc-status').textContent));
+    await page.click('#calc-status'); // selects the problem text
+    assert.equal(await page.$eval('#formula', t => t.value.slice(t.selectionStart, t.selectionEnd)), '2600mhz');
+    await page.fill('#formula', '10(2600Hz@2ms+2msSi)');
+    await page.waitForFunction(() => /✓ 10 tones · 20 steps · 40ms/.test(document.querySelector('#calc-status').textContent));
+    // Build "DT@2s 1s #411" with the keys.
+    await page.click('text=CLR');
+    await page.click('.calc-palette summary >> text=Call Progress');
+    await page.click('.calc-palette button[aria-label="Insert Dial tone"]');
+    await page.click('.ckey >> text=@2s');
+    await page.click('.ckey >> text=⏸ 1s');
+    for (const k of ['#', '4', '1', '1']) await page.click('.calc-pad button[aria-label="Insert key ' + k + '"]');
+    assert.equal(await page.inputValue('#formula'), 'DT@2s 1s #411');
+    await page.waitForFunction(() => /✓ 5 tones · 6 steps · 5s/.test(document.querySelector('#calc-status').textContent));
+    await page.click('.ckey >> text=▶ PLAY');
+    assert.equal(await page.evaluate(() => WebPhreak.engine.current && WebPhreak.engine.current.id), 'formula');
+    await page.click('.ckey >> text=■ STOP');
+    assert.equal(await page.evaluate(() => WebPhreak.engine.current), null);
+    await page.fill('#calc-name', 'Info call');
+    const [d] = await Promise.all([page.waitForEvent('download'), page.click('.ckey >> text=⤓ WAV')]);
+    assert.equal(d.suggestedFilename(), 'webphreak_formula-info-call.wav');
+    const buf = fs.readFileSync(await d.path());
+    assert.equal(wav.decode(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.length)).samples.length, 5 * 44100);
+    await page.click('.ckey >> text=💾 SAVE');
+    await page.click('text=CLR');
+    await page.click('.saved >> text=Load');
+    assert.equal(await page.inputValue('#formula'), 'DT@2s 1s #411');
+    await page.reload();
+    assert.match(await page.locator('.saved').innerText(), /Info call/);
+    // Share link round trip.
+    await page.goto(base + 'compose.html#f=' + encodeURIComponent('keys=mf KP 121 ST'));
+    assert.equal(await page.inputValue('#formula'), 'keys=mf KP 121 ST');
+    assert.match(await status(), /✓ 5 tones/);
+    // Every example loads without an error.
+    const n = await page.locator('.example').count();
+    for (let i = 0; i < n; i++) {
+      await page.locator('.example').nth(i).locator('text=Load').click();
+      assert.match(await status(), /^✓/, 'example ' + i);
+    }
+    assert.deepEqual(errors, []);
   });
 
   if (browserName === 'chromium') {

@@ -9,7 +9,7 @@
   const { catalog, refs, timeline: TL, synth, wav, engine } = WP;
   const doc = root.document;
 
-  const NAV = catalog.CATEGORIES.map(c => ({ href: c.page, label: c.title, cat: c.id })).concat([{ href: 'decode.html', label: 'Tone Decoder', cat: 'decode' }, { href: 'callerid.html', label: 'Caller ID Decoder', cat: 'callerid' }, { href: 'history.html', label: 'History & Sources', cat: 'history' }]);
+  const NAV = catalog.CATEGORIES.map(c => ({ href: c.page, label: c.title, cat: c.id })).concat([{ href: 'compose.html', label: 'Tone Calculator', cat: 'compose' }, { href: 'decode.html', label: 'Tone Decoder', cat: 'decode' }, { href: 'callerid.html', label: 'Caller ID Decoder', cat: 'callerid' }, { href: 'history.html', label: 'History & Sources', cat: 'history' }]);
   const PREF_KEY = 'webphreak.volume';
 
   // ---------- small DOM helpers ----------
@@ -462,6 +462,8 @@
     if (board) renderBoard(board, board.dataset.board);
     const pad = $('#payphone-keys');
     if (pad) renderPayphone(pad);
+    const comp = $('#composer');
+    if (comp && WP.composer) WP.composer.mount(comp);
     const dec = $('#decoder');
     if (dec && WP.decoder) WP.decoder.mount(dec);
     // Offline support: register the service worker on http(s) only (not file://).

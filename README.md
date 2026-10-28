@@ -6,6 +6,16 @@
 
 > **What this is not.** It is a listening and history demonstration. Nothing here dials, transmits, injects audio into a telephone or radio network, or bypasses payment. Data examples marked *Illustrative* are not valid signalling packets, and nothing is a calibrated test instrument or an emergency transmission.
 
+## Screenshots
+
+| DTMF keypad | Bluebox / MF / Trunk |
+| --- | --- |
+| ![DTMF keypad page with LCD readout and 16 keys](docs/screenshots/dtmf-keypad.png) | ![Bluebox page with 2600 Hz, MF digits and R2 tone keys](docs/screenshots/bluebox.png) |
+
+| Radio, Data & Test | Call Progress (mobile width) |
+| --- | --- |
+| ![Radio, Data and Test page with green PCB styling](docs/screenshots/radio-data-test.png) | ![Call Progress page at phone width](docs/screenshots/progress-mobile.png) |
+
 ## Pages
 
 The site is organised by tone type. All pages share navigation, a volume control, **STOP ALL**, a hearing-safety note, tooltips and an info/download dialog.

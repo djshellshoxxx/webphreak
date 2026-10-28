@@ -46,6 +46,7 @@ code { font-family: var(--mono); font-size: .9em; }
 #site-nav a[data-cat="dtmf"]::before { content: "● "; color: #c7cbcf; }
 #site-nav a[data-cat="progress"]::before { content: "● "; color: #9aa1a9; }
 #site-nav a[data-cat="lab"]::before { content: "● "; color: #6fcf97; }
+#site-nav a[data-cat="decode"]::before { content: "● "; color: #ffd75e; }
 #site-nav a[data-cat="callerid"]::before { content: "● "; color: #c792ea; }
 #site-nav a[data-cat="history"]::before { content: "● "; color: #d7b25a; }
 
@@ -172,6 +173,38 @@ footer.site { max-width: 1120px; margin: 0 auto; padding: 18px 16px 30px; color:
 .mixgroup legend { padding: 0 6px; color: var(--muted); font-size: .85rem; }
 .mixgroup .keys { grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); gap: 10px; }
 .mixdl { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+
+/* ---------- live scope (control bar) ---------- */
+.scope { grid-column: 1 / -1; margin: 0 0 6px; }
+.scope-views { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.scope figure { margin: 0; }
+.scope canvas { display: block; width: 100%; height: 96px; border-radius: 6px; border: 1px solid var(--line); background: #05080a; }
+.scope figcaption { font-size: .7rem; color: var(--muted); }
+.scope-read { margin: 4px 0 0; font: 600 .85rem var(--mono); color: var(--accent); }
+.scope-peaks { margin: 0; font: .75rem var(--mono); color: var(--muted); }
+.scope-toggle { white-space: nowrap; }
+.scope-toggle[aria-expanded="true"] { border-color: var(--accent); }
+@media (max-width: 520px) { .scope-views { grid-template-columns: 1fr; } .scope canvas { height: 64px; } }
+
+/* ---------- rotary dial ---------- */
+.rotary-wrap { display: flex; justify-content: center; padding: 8px 0 4px; }
+.rotary { position: relative; width: min(86vw, 340px); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, #2b2e33 0 30%, #e9e6dc 31% 48%, #1d1f22 49% 100%); box-shadow: 0 10px 30px #000a, inset 0 0 0 6px #0b0c0d; touch-action: none; }
+.rotary .numbers { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.rotary .numbers span { position: absolute; transform: translate(-50%, -50%); font: 800 clamp(18px, 5.5vw, 24px) var(--sans); color: #f3f1ea; text-shadow: 0 1px 2px #000, 0 0 6px #000; }
+.rotary .wheel { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle, transparent 0 29%, #2a2c30cc 30% 100%); border: 3px solid #44484d; box-shadow: inset 0 2px 6px #fff2; }
+.keycap.hole { position: absolute; transform: translate(-50%, -50%); width: 21%; min-width: 0; min-height: 0; aspect-ratio: 1; padding: 0; border-radius: 50%; background: radial-gradient(circle, #ffffff14 0 55%, #ffffff30 70%, #00000080 100%); border: 3px solid #0b0c0d; box-shadow: inset 0 3px 6px #000c; touch-action: none; }
+.keycap.hole::after { display: none; }
+.keycap.hole.active, .keycap.hole:active { transform: translate(-50%, -50%); background: radial-gradient(circle, #ffd75e33 0 60%, #00000080 100%); }
+.rotary .hub { z-index: 3; position: absolute; left: 50%; top: 50%; width: 36%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 40% 35%, #f3f1ea, #b9b6aa 70%, #77756c); color: #222; font: 800 clamp(9px, 2.6vw, 12px) var(--mono); letter-spacing: .12em; pointer-events: none; box-shadow: 0 2px 6px #000a; }
+.rotary .fstop { z-index: 3; position: absolute; width: 7%; height: 15%; transform: translate(-50%, -50%) rotate(77deg); border-radius: 6px; background: linear-gradient(90deg, #d9d9d9, #8c8c8c); box-shadow: 0 2px 4px #000c; pointer-events: none; }
+
+/* ---------- decoder ---------- */
+.dec-summary { font: 600 1rem var(--mono); overflow-wrap: anywhere; }
+.dec-timeline { display: block; width: 100%; height: 56px; margin: 6px 0 10px; border-radius: 6px; border: 1px solid var(--line); }
+.dec-live { font: .9rem var(--mono); color: var(--accent); }
+#decoder select { min-height: 40px; max-width: 100%; font: inherit; padding: 4px 8px; border-radius: 6px; background: var(--bg2); color: var(--ink); border: 1px solid var(--line); }
+#decoder input[type=file] { max-width: 100%; }
 
 @media (max-width: 520px) {
   main { padding: 12px 10px; }

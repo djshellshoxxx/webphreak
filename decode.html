@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Decode DTMF, MF, 2600 Hz, coin and call-progress tones from a catalog sample, an audio file or the microphone, locally in your browser.">
+<meta name="theme-color" content="#15171a">
+<title>Tone Decoder · WebPhreak</title>
+<link rel="stylesheet" href="assets/css/webphreak.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+<script src="assets/js/refs.js" defer></script>
+<script src="assets/js/timeline.js" defer></script>
+<script src="assets/js/synth.js" defer></script>
+<script src="assets/js/wav.js" defer></script>
+<script src="assets/js/catalog.js" defer></script>
+<script src="assets/js/engine.js" defer></script>
+<script src="assets/js/detect.js" defer></script>
+<script src="assets/js/scope.js" defer></script>
+<script src="assets/js/decoder.js" defer></script>
+<script src="assets/js/ui.js" defer></script>
+</head>
+<body class="theme-neutral" data-page="decode">
+<a class="skip" href="#main">Skip to content</a>
+<nav id="site-nav" aria-label="Tone groups"><a class="brand" href="index.html">WEBPHREAK</a><ul><li><a href="index.html">DTMF Keypad</a></li><li><a href="redbox.html">Payphone / Redbox</a></li><li><a href="bluebox.html">Bluebox / MF / Trunk</a></li><li><a href="progress.html">Call Progress &amp; Alerts</a></li><li><a href="lab.html">Radio, Data &amp; Test</a></li><li><a href="decode.html">Tone Decoder</a></li><li><a href="callerid.html">Caller ID Decoder</a></li><li><a href="history.html">History &amp; Sources</a></li></ul></nav>
+<main id="main">
+<h1>Tone Decoder</h1>
+<p class="lede">Find out which telephone signals are in a sound. The decoder recognizes DTMF keys, MF (R1 / CCITT No. 5) digits and control signals, 2600 Hz, ACTS coin bursts and North American dial, busy and ringback pairs. Everything runs in your browser; nothing is uploaded.</p>
+<div id="decoder"></div>
+<details class="help" open>
+  <summary>How it works</summary>
+  <p>The decoder measures the strength of each known frequency with the Goertzel algorithm, a one-frequency Fourier transform, and accepts a signal only when its frequencies explain at least 80 % of the sound’s energy. It is the same idea exchange receivers used to detect DTMF digits. The audio is first split wherever it goes quiet, so separate coin bursts and dialed digits stay separate. Signals it does not know (SIT, R2, radio and data tones) are reported as not found rather than guessed.</p>
+  <p class="evidence">The decoder’s frequencies come from the same catalog the site plays, so it inherits each entry’s evidence status. It has been tested on the site’s own synthesized audio with added noise. It has not been tested against real line recordings.</p>
+  <p>The live scope (〰 Scope in the control bar on every page) also names the tone that is currently playing.</p>
+</details>
+</main>
+<div id="controls"><noscript><p class="notice">JavaScript is required to generate audio.</p></noscript></div>
+<footer class="site"><p>WebPhreak is a historical audio demonstration. All sound is generated locally in your browser; nothing dials, transmits or connects to a telephone or radio network. Values are labelled by evidence status; see <a href="history.html">History &amp; Sources</a>. Repository: <a href="https://github.com/djshellshoxxx/webphreak">djshellshoxxx/webphreak</a>.</p></footer>
+</body>
+</html>

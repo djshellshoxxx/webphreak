@@ -17,7 +17,7 @@
   const LOOKAHEAD = 0.5, TICK_MS = 100, START_DELAY = 0.03, HOLD_MIN = 0.12, RELEASE = 0.012;
   const MAX_GAIN = 0.8, MIXER_MAX = 8;
 
-  let ctx = null, master = null, volume = 0.3;
+  let ctx = null, bus = null, master = null, analyser = null, volume = 0.3;
   let current = null;
   const mixer = new Map();
   const listeners = new Set();
@@ -30,9 +30,21 @@
       const AC = root.AudioContext || root.webkitAudioContext;
       if (!AC) throw new Error('Web Audio is not supported in this browser');
       ctx = new AC();
+      // bus (all voices) -> master (volume) -> speakers; bus -> analyser for the scope and
+      // live decoder, tapped before the volume control so it reads the same at any volume.
+      bus = ctx.createGain();
       master = ctx.createGain();
       master.gain.value = curve(volume);
+      bus.connect(master);
       master.connect(ctx.destination);
+      analyser = ctx.createAnalyser();
+      analyser.fftSize = 4096;
+      analyser.smoothingTimeConstant = 0.2;
+      const sink = ctx.createGain();
+      sink.gain.value = 0; // keeps the analyser pulled by the graph without adding sound
+      bus.connect(analyser);
+      analyser.connect(sink);
+      sink.connect(ctx.destination);
     }
     if (ctx.state === 'suspended') ctx.resume();
     return ctx;
@@ -56,6 +68,16 @@
    *  AudioContext and OfflineAudioContext. `track` collects started source nodes. */
   function scheduleEvents(c, dest, tl, events, t0, track) {
     const norm = tl.norm;
+    for (const ev of events) {
+      if (!ev.click) continue;
+      // Same click samples as synth.js, played at the segment start.
+      const w = SY.clickWave(c.sampleRate), buf = c.createBuffer(1, w.length, c.sampleRate);
+      buf.copyToChannel(w, 0);
+      const src = c.createBufferSource(), g = c.createGain();
+      src.buffer = buf; g.gain.value = ev.click;
+      src.connect(g); g.connect(dest);
+      src.start(t0 + ev.t); track(src);
+    }
     const runs = SY.runsOf({ events, synthesis: tl.synthesis });
     for (const run of runs) {
       const rs = t0 + run.start, re = t0 + run.end;
@@ -103,7 +125,7 @@
   function newVoice(entry) {
     const out = ctx.createGain();
     out.gain.value = 1;
-    out.connect(master);
+    out.connect(bus);
     return { entry, out, nodes: new Set(), timers: [], stopped: false };
   }
 
@@ -243,6 +265,8 @@
     get current() { return current ? current.entry : null; },
     get mixerFrequencies() { return [...mixer.keys()]; },
     get volume() { return volume; },
+    get analyser() { return analyser; },
+    get context() { return ctx; },
     MIXER_MAX
   };
 })(typeof self !== 'undefined' ? self : this);

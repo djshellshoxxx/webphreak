@@ -9,7 +9,7 @@
   const { catalog, refs, timeline: TL, synth, wav, engine } = WP;
   const doc = root.document;
 
-  const NAV = catalog.CATEGORIES.map(c => ({ href: c.page, label: c.title, cat: c.id })).concat([{ href: 'callerid.html', label: 'Caller ID Decoder', cat: 'callerid' }, { href: 'history.html', label: 'History & Sources', cat: 'history' }]);
+  const NAV = catalog.CATEGORIES.map(c => ({ href: c.page, label: c.title, cat: c.id })).concat([{ href: 'decode.html', label: 'Tone Decoder', cat: 'decode' }, { href: 'callerid.html', label: 'Caller ID Decoder', cat: 'callerid' }, { href: 'history.html', label: 'History & Sources', cat: 'history' }]);
   const PREF_KEY = 'webphreak.volume';
 
   // ---------- small DOM helpers ----------
@@ -71,6 +71,15 @@
       statusEl,
       h('p', { class: 'hearing', id: 'hearing-note' }, 'Hearing safety: start low, especially with headphones. Browser volume is not a calibrated line level.')
     );
+    if (WP.scope) WP.scope.mount(bar);
+    // Offer "Install app" where the browser supports it (Chromium); iOS uses Share → Add to Home Screen.
+    root.addEventListener('beforeinstallprompt', ev => {
+      ev.preventDefault();
+      if ($('#install-app')) return;
+      const b = h('button', { type: 'button', class: 'mini', id: 'install-app' }, '⤓ Install app');
+      b.addEventListener('click', async () => { b.remove(); try { ev.prompt(); await ev.userChoice; } catch (e) { /* dismissed */ } });
+      ($('.vol', bar) || bar).append(b);
+    });
   }
 
   // ---------- tooltip (visual only; same text is in each key's accessible description) ----------
@@ -326,15 +335,16 @@
     let dialed = '';
     const show = e => {
       if (!lcdDigits) return;
-      dialed = (dialed + e.sym).slice(-20);
+      const rotary = e.sec === 'rotary';
+      dialed = (dialed + (rotary ? e.sym.slice(1) : e.sym)).slice(-20);
       lcdDigits.textContent = dialed;
       const f = TL.freqList(e);
-      lcdFreq.textContent = f.map(x => x + ' Hz').join(' + ');
+      lcdFreq.textContent = rotary ? e.segments.filter(x => x.click === 1).length + ' pulses · 10 pps' : f.map(x => x + ' Hz').join(' + ');
     };
     WP.onPlay = e => { if (e.cat === 'dtmf') show(e); };
     const clr = $('#lcd-clear');
     if (clr) clr.addEventListener('click', () => { dialed = ''; lcdDigits.textContent = 'READY'; lcdFreq.textContent = '— Hz'; });
-    const keys = catalog.inCategory('dtmf');
+    const keys = catalog.inCategory('dtmf').filter(e => e.sec === 'keypad');
     container.replaceChildren(...keys.map(e => {
       const b = h('button', { type: 'button', class: 'pkey' + (/^[A-D]$/.test(e.sym) ? ' ext' : ''), 'data-id': e.id, 'aria-label': e.name, 'aria-describedby': 'desc-' + e.id },
         h('strong', {}, e.sym), h('span', {}, e.sub || ' '));
@@ -355,6 +365,22 @@
           h('td', {}, h('span', { class: 'st st-' + e.status }, statusOf(e).label)),
           h('td', {}, h('button', { type: 'button', class: 'mini', 'aria-label': 'Information about ' + e.name, onclick: () => openDialog(e, 'info') }, 'ⓘ')),
           h('td', {}, h('button', { type: 'button', class: 'mini', 'aria-label': 'Download WAV of ' + e.name, onclick: () => openDialog(e, 'download') }, '⤓'))))));
+    }
+    const rot = $('#rotary');
+    if (rot && WP.rotary) {
+      const pulses = catalog.inCategory('dtmf').filter(e => e.sec === 'rotary');
+      pulses.forEach(e => { if (!activeButtons.has(e.id)) activeButtons.set(e.id, new Set()); });
+      WP.rotary.mount(rot, e => start(e));
+      const rt = $('#rotary-table');
+      if (rt) {
+        rt.replaceChildren(h('thead', {}, h('tr', {}, ['Digit', 'Pulses', 'Length', 'Status', 'Info', 'WAV'].map(t => h('th', { scope: 'col' }, t)))),
+          h('tbody', {}, pulses.map(e => h('tr', { id: 'tone-' + e.id },
+            h('th', { scope: 'row' }, e.sym.slice(1)), h('td', {}, e.segments.filter(x => x.click === 1).length),
+            h('td', {}, TL.fmtS(TL.cycleDuration(e)), h('span', { class: 'vh', id: 'desc-' + e.id }, e.name + '. ' + statusOf(e).label + '.')),
+            h('td', {}, h('span', { class: 'st st-' + e.status }, statusOf(e).label)),
+            h('td', {}, h('button', { type: 'button', class: 'mini', 'aria-label': 'Information about ' + e.name, onclick: () => openDialog(e, 'info') }, 'ⓘ')),
+            h('td', {}, h('button', { type: 'button', class: 'mini', 'aria-label': 'Download WAV of ' + e.name, onclick: () => openDialog(e, 'download') }, '⤓'))))));
+      }
     }
   }
 
@@ -436,6 +462,12 @@
     if (board) renderBoard(board, board.dataset.board);
     const pad = $('#payphone-keys');
     if (pad) renderPayphone(pad);
+    const dec = $('#decoder');
+    if (dec && WP.decoder) WP.decoder.mount(dec);
+    // Offline support: register the service worker on http(s) only (not file://).
+    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+      navigator.serviceWorker.register('sw.js').catch(err => console.warn('Offline mode unavailable:', err.message));
+    }
     const mix = $('#mixer');
     if (mix) renderMixer(mix);
     const ct = $('#catalog-table');

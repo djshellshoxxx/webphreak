@@ -30,7 +30,7 @@
 
   const CATEGORIES = [
     { id: 'dtmf', page: 'index.html', title: 'DTMF Keypad', short: 'DTMF', theme: 'payphone',
-      sections: [{ id: 'keypad', title: 'Standard 16-key DTMF matrix (ITU-T Q.23)' }] },
+      sections: [{ id: 'keypad', title: 'Standard 16-key DTMF matrix (ITU-T Q.23)' }, { id: 'rotary', title: 'Rotary dial pulses (decadic)' }] },
     { id: 'redbox', page: 'redbox.html', title: 'Payphone / Redbox', short: 'Redbox', theme: 'red',
       sections: [
         { id: 'us-acts', title: 'United States · ACTS coin-deposit tones (1700 + 2200 Hz)' },
@@ -129,6 +129,18 @@
       : 'Row ' + ROWS[r] + ' Hz plus column ' + COLS[c] + ' Hz, sounded together while the key is held.',
     legacy: ['index.html', 'tribute.html'].concat(c === 3 ? ['phreak.html#' + k] : [])
   })));
+
+  // Rotary (decadic) pulse dialing: digit n opens the line n times (0 = ten), 10 pulses/s.
+  const PULSE_BREAK = 0.066, PULSE_MAKE = 0.034;
+  ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'].forEach(d => {
+    const n = d === '0' ? 10 : Number(d), segs = [];
+    for (let i = 0; i < n; i++) segs.push(seg([], PULSE_BREAK, { click: 1 }), seg([], PULSE_MAKE, { click: 0.4 }));
+    add({ id: 'pulse-' + d, cat: 'dtmf', sec: 'rotary', sym: 'P' + d, name: 'Rotary pulse digit ' + d + ' (' + n + ' pulses)', aliases: [],
+      play: 'once', synthesis: 'tones', segments: segs, status: 'approximate', region: 'Worldwide (rotary/decadic dialing; 10 pulses per second nominal)',
+      refs: ['wiki-pulse', 'cept-4902', 'bt-howdial'],
+      about: 'A rotary dial interrupts the line current ' + n + ' time' + (n > 1 ? 's' : '') + ' as it returns. The clicks you heard in the earpiece are those interruptions. There is no tone.',
+      notes: 'Timing: 10 pulses/s with a 66 ms break and 34 ms make (secondary sources give a ~2:1 ratio; CEPT allows 60–68 % break; a UK standard specified 66 %). The click sound itself is a modelled 8 ms burst, not a recording; break clicks are louder than make clicks.' });
+  });
 
   // =====================================================================
   // B. Payphone / Redbox

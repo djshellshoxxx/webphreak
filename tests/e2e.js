@@ -12,8 +12,8 @@ const catalog = require('../assets/js/catalog.js');
 
 const ROOT = path.resolve(__dirname, '..');
 const BASE_PATH = '/webphreak/'; // mimic the GitHub Pages project sub-path
-const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png' };
-const PAGES = ['index', 'redbox', 'bluebox', 'progress', 'lab', 'history', 'prototype', 'signals', 'phreak', 'heritage', 'tribute'];
+const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
+const PAGES = ['index', 'redbox', 'bluebox', 'progress', 'lab', 'decode', 'history', 'prototype', 'signals', 'phreak', 'heritage', 'tribute'];
 const CAT_PAGE = { dtmf: 'index', redbox: 'redbox', bluebox: 'bluebox', progress: 'progress', lab: 'lab' };
 
 function serve() {
@@ -184,7 +184,7 @@ async function run(browserName, base) {
   if (browserName === 'chromium') {
     await check(tag('Web Audio playback path matches the WAV renderer (OfflineAudioContext)'), async () => {
       await page.goto(base + 'progress.html');
-      const ids = ['dtmf-1', 'acts-dime', 'acts-quarter', 'na-busy', 'sit-ic', 'mf-kp', 'gb-collect', 'kcs-hi', 'same-preamble', 'na-roh'];
+      const ids = ['dtmf-1', 'acts-dime', 'acts-quarter', 'na-busy', 'sit-ic', 'mf-kp', 'gb-collect', 'kcs-hi', 'same-preamble', 'na-roh', 'pulse-5'];
       const rows = await page.evaluate(async ids => {
         const out = [];
         for (const id of ids) {
@@ -240,6 +240,90 @@ async function run(browserName, base) {
       }
       assert.equal(n, catalog.ENTRIES.length);
       console.log('     downloaded ' + n + ' WAV files');
+    });
+  }
+
+  await check(tag('live scope shows the playing tone and names it'), async () => {
+    await page.goto(base + 'index.html');
+    await page.evaluate(() => localStorage.removeItem('webphreak.scope'));
+    await page.reload();
+    await page.click('.scope-toggle');
+    assert.equal(await page.getAttribute('.scope-toggle', 'aria-expanded'), 'true');
+    const key = page.locator('.pkey[data-id="dtmf-8"]');
+    await key.evaluate(el => el.scrollIntoView({ block: 'center' })); // the open scope panel covers the bottom
+    const b = await key.boundingBox();
+    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+    await page.mouse.down();
+    await page.waitForFunction(() => /DTMF 8/.test(document.querySelector('.scope-read').textContent), null, { timeout: 3000 });
+    assert.match(await page.locator('.scope-peaks').innerText(), /852 · 1336 Hz/);
+    await page.mouse.up();
+    await page.click('.scope-toggle');
+  });
+
+  await check(tag('rotary dial: drag to the stop dials, early release does not, tap auto-dials'), async () => {
+    await page.goto(base + 'index.html');
+    const cur = () => page.evaluate(() => WebPhreak.engine.current && WebPhreak.engine.current.id);
+    const hole = page.locator('.keycap.hole[data-id="pulse-3"]');
+    await hole.scrollIntoViewIfNeeded();
+    const wheel = await page.locator('.rotary .wheel').boundingBox();
+    const cx = wheel.x + wheel.width / 2, cy = wheel.y + wheel.height / 2, R = wheel.width * 0.37;
+    const start = await page.evaluate(() => 60 - WebPhreak.rotary.travel(2)); // hole 3 angle
+    const drag = async degrees => {
+      await page.mouse.move(cx + R * Math.cos(start * Math.PI / 180), cy + R * Math.sin(start * Math.PI / 180));
+      await page.mouse.down();
+      for (let a = 0; a <= degrees; a += 5) { const r = (start + a) * Math.PI / 180; await page.mouse.move(cx + R * Math.cos(r), cy + R * Math.sin(r)); }
+      await page.mouse.up();
+    };
+    await drag(40); // stop is at 120° of travel for digit 3
+    await page.waitForTimeout(300);
+    assert.equal(await cur(), null, 'early release must not dial');
+    await drag(125);
+    assert.equal(await cur(), 'pulse-3');
+    assert.match(await page.locator('#lcd-digits').innerText(), /3$/);
+    await page.waitForTimeout(500);
+    assert.equal(await cur(), null, '3 pulses take 0.3 s');
+    await page.focus('.keycap.hole[data-id="pulse-0"]');
+    await page.keyboard.press('Enter');
+    await page.waitForFunction(() => WebPhreak.engine.current && WebPhreak.engine.current.id === 'pulse-0', null, { timeout: 2000 });
+    await page.click('#stop-all');
+  });
+
+  await check(tag('decoder page: catalog round trip and an uploaded WAV'), async () => {
+    await page.goto(base + 'decode.html');
+    await page.selectOption('#dec-sample', 'mf-st2p');
+    await page.click('text=Render and decode');
+    assert.match(await page.locator('.dec-summary').innerText(), /MF ST2P/);
+    await page.selectOption('#dec-sample', 'sit-ic');
+    await page.click('text=Render and decode');
+    assert.match(await page.locator('.dec-summary').innerText(), /No known tones/);
+    // Build a WAV with DTMF 1, 2, 3 using the site's own modules, then upload it.
+    const TL = require('../assets/js/timeline.js'), SY = require('../assets/js/synth.js');
+    const parts = ['dtmf-1', 'dtmf-2', 'dtmf-3'].map(id => SY.render(TL.expand(catalog.byId.get(id), { duration: 0.12 }), { sampleRate: 22050 }));
+    const gap = 2205, x = new Float32Array(parts.reduce((n, p) => n + p.length + gap, gap));
+    let o = gap; parts.forEach(p => { x.set(p, o); o += p.length + gap; });
+    await page.setInputFiles('#dec-file', { name: 'digits.wav', mimeType: 'audio/wav', buffer: Buffer.from(wav.encode(x, 22050)) });
+    await page.waitForFunction(() => /digits\.wav/.test(document.querySelector('#dec-results').textContent), null, { timeout: 5000 });
+    assert.match(await page.locator('.dec-summary').innerText(), /DTMF 1 2 3/);
+  });
+
+  if (browserName === 'chromium') {
+    await check(tag('offline: service worker caches the site and pages load without network'), async () => {
+      const o = await browser.newContext();
+      const op = await o.newPage();
+      await op.goto(base + 'index.html');
+      await op.evaluate(async () => { await navigator.serviceWorker.ready; });
+      await op.waitForFunction(async () => (await caches.keys()).some(k => k.startsWith('webphreak-')));
+      await op.waitForFunction(async () => { const c = await caches.open((await caches.keys()).find(k => k.startsWith('webphreak-'))); return !!(await c.match('decode.html')); });
+      await o.setOffline(true);
+      for (const p of ['index', 'bluebox', 'decode', 'callerid']) {
+        await op.goto(base + p + '.html');
+        assert.ok((await op.title()).length > 0, p);
+      }
+      await op.goto(base + 'lab.html');
+      assert.equal(await op.locator('.keycap[data-id="ref-1004"]').count(), 1, 'scripts load from cache');
+      const manifest = await op.evaluate(async () => (await fetch('manifest.webmanifest')).json());
+      assert.equal(manifest.icons.length >= 3, true);
+      await o.close();
     });
   }
 

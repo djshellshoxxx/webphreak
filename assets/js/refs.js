@@ -79,6 +79,9 @@
     'cfr-11-31': R('47 CFR 11.31: EAS protocol', 'U.S. Code of Federal Regulations (LII)', 'https://www.law.cornell.edu/cfr/text/47/11.31', 'primary', 'search-summary'),
     'itu-m493': R('Recommendation ITU-R M.493-12: Digital selective-calling system for use in the maritime mobile service', 'ITU-R, 2007', 'https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.493-12-200703-S!!PDF-A.pdf', 'primary', 'search-summary'),
     'ccitt-o6': R('CCITT Recommendation O.6 (1992 text): 1020 Hz reference test frequency', 'CCITT (mirror at MIT)', 'https://stuff.mit.edu/afs/net/dev/reference/ccitt/1992/o/o6.asc', 'primary', 'search-summary'),
-    'prc68-kyv2': R('KY-57 / VINSON notes', 'PRC68.com', 'https://www.PRC68.com/I/KYV2.shtml', 'hobbyist')
+    'prc68-kyv2': R('KY-57 / VINSON notes', 'PRC68.com', 'https://www.PRC68.com/I/KYV2.shtml', 'hobbyist'),
+    'wiki-pulse': R('Pulse dialing', 'Wikipedia', 'https://en.wikipedia.org/wiki/Pulse_dialing', 'secondary'),
+    'cept-4902': R('CEPT Recommendation T/CS 49-02 (dial pulse limits)', 'ETSI / CEPT', 'https://etsi.org/deliver/cept/49/4902CS.PDF', 'primary', 'search-summary'),
+    'bt-howdial': R('How a telephone dial works', 'britishtelephones.com', 'https://www.britishtelephones.com/howdial.htm', 'hobbyist')
   };
 });

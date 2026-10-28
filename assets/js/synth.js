@@ -71,8 +71,30 @@
         out[r1 - 1 - i] *= g;
       }
     }
+    for (const ev of tl.events) {
+      if (!ev.click) continue;
+      const w = clickWave(sr), s0 = Math.round(ev.t * sr), g = peak * ev.click;
+      for (let i = 0; i < w.length && s0 + i < total; i++) out[s0 + i] += w[i] * g;
+    }
     return out;
   }
 
-  return { RAMP, DEFAULT_PEAK, render, runsOf };
+  /** Line click heard when a rotary dial opens or closes the loop: a deterministic
+   *  damped two-component burst (8 ms, peak 1). A modelled sound, not a recording. */
+  const clickCache = new Map();
+  function clickWave(sr) {
+    if (clickCache.has(sr)) return clickCache.get(sr);
+    const n = Math.round(0.008 * sr), w = new Float32Array(n);
+    let p = 0;
+    for (let i = 0; i < n; i++) {
+      const t = i / sr, env = Math.exp(-t / 0.0012);
+      w[i] = env * (0.6 * Math.sin(2 * Math.PI * 900 * t) + 0.4 * Math.sin(2 * Math.PI * 2300 * t));
+      p = Math.max(p, Math.abs(w[i]));
+    }
+    for (let i = 0; i < n; i++) w[i] /= p;
+    clickCache.set(sr, w);
+    return w;
+  }
+
+  return { RAMP, DEFAULT_PEAK, render, runsOf, clickWave };
 });

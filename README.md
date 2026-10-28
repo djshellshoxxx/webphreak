@@ -11,6 +11,7 @@
 | 16-key DTMF payphone | https://djshellshoxxx.github.io/webphreak/ | Classic telephone keypad plus A/B/C/D |
 | Hacked Numpad Prototype | https://djshellshoxxx.github.io/webphreak/prototype.html | Historic North American call-progress and MF tones |
 | Signal Laboratory | https://djshellshoxxx.github.io/webphreak/signals.html | R2, radio, alert, and maintenance-tone demonstrations |
+| Caller ID Decoder | https://djshellshoxxx.github.io/webphreak/callerid.html | Reads Bell 202 FSK caller ID audio (SDMF/MDMF) from a file or microphone |
 
 The addresses above assume GitHub Pages is enabled and publishing from `main` at `/ (root)`. A published site has **not** been independently verified.
 
@@ -94,6 +95,10 @@ Buttons are labeled `F12` through `F56` and `B12` through `B56`, where the two d
 | UK33 | Historical UK dial tone | 400 + 33 Hz |
 | UK50 | Historical UK dial tone | 400 + 50 Hz |
 
+### 4. Caller ID Decoder — `callerid.html`
+
+A client-side Bell 202 FSK demodulator. It accepts an uploaded audio file or a live microphone recording of a caller-ID burst (the data sent in the silent interval between the first and second ring) and decodes it into date/time, number and, for MDMF, name, using a Goertzel-filter mark/space discriminator with per-byte edge resynchronization and a checksum check. It reads audio you provide; it has no line, modem, or telecom network access and cannot generate or inject a caller ID signal. It decodes what a recording contains — it does not produce a value for an arbitrary name or number. Works best on recordings at 16 kHz or higher; 8 kHz recordings decode but have little noise margin. Not validated against a hardware caller-ID receiver or a large corpus of real-world captures.
+
 ### Interactive behavior
 
 - Pointer-down starts the signal.
@@ -114,6 +119,7 @@ webphreak/
 ├── index.html        # Metallic 16-key DTMF payphone
 ├── prototype.html    # PCB-style call-progress / MF board
 ├── signals.html      # Historical signaling laboratory
+├── callerid.html     # Bell 202 FSK caller ID decoder (SDMF/MDMF)
 ├── email2sms/        # Standalone Node service, separate from the static site (see below)
 └── README.md         # Documentation
 ```

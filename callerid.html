@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WebPhreak — Caller ID Decoder</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;background:radial-gradient(ellipse at top,#44484c,#17191b);font-family:Arial,sans-serif;color:#eee;padding:24px 14px 40px}
+main{max-width:640px;margin:0 auto}
+nav{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:20px;font-size:13px}
+nav a{color:#fff;text-decoration:none;opacity:.8}
+nav a:hover{opacity:1;text-decoration:underline}
+h1{font-size:1.3rem;letter-spacing:.08em;margin:0 0 4px;text-align:center}
+.sub{text-align:center;color:#b7b9ba;font-size:.82rem;margin-bottom:18px}
+.panel{background:repeating-linear-gradient(0deg,#424549 0px,#3c3e42 2px,#494c4e 4px);border:2px solid #64686a;border-radius:16px;padding:18px 16px;box-shadow:inset 0 2px 4px #aaa5,0 18px 50px #0009;margin-bottom:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+button{background:linear-gradient(135deg,#e0e2df 0%,#9c9fa1 22%,#777b7e 55%,#b8babc 85%,#62676a 100%);color:#151617;border:2px solid #191b1e;border-radius:9px;padding:10px 16px;font-weight:700;font-size:.85rem;cursor:pointer}
+button:active{transform:translateY(1px)}
+button:disabled{opacity:.45;cursor:not-allowed}
+input[type=file]{color:#ddd;font-size:.8rem}
+.status{font-size:.8rem;color:#c7c8c9;margin-top:10px;min-height:1.2em}
+.field{display:grid;grid-template-columns:120px 1fr;gap:4px 10px;font-size:.88rem;padding:4px 0;border-bottom:1px solid #ffffff14}
+.field b{color:#9fd3ff}
+.hex{font-family:ui-monospace,Consolas,monospace;font-size:.72rem;color:#9a9c9d;word-break:break-all;margin-top:10px;line-height:1.5}
+.note{font-size:.72rem;color:#aeb0b2;margin-top:14px;line-height:1.5}
+.badge{display:inline-block;font-size:.68rem;padding:2px 7px;border-radius:5px;margin-left:6px}
+.ok{background:#1f6f3a;color:#d7ffe4}
+.bad{background:#7a2626;color:#ffd7d7}
+h2{font-size:.95rem;margin:0 0 10px;color:#d9dadb}
+</style>
+</head>
+<body>
+<main>
+<nav><a href="./index.html">Payphone</a><a href="./prototype.html">Prototype</a><a href="./signals.html">Signal Lab</a><a href="./phreak.html">Historical Phreak</a><a href="./heritage.html">Other Heritage</a><a href="./callerid.html">Caller ID Decoder</a></nav>
+
+<h1>CALLER ID DECODER</h1>
+<div class="sub">Bell 202 FSK · SDMF / MDMF (Telcordia GR-30-CORE)</div>
+
+<div class="panel">
+  <h2>Input</h2>
+  <div class="row">
+    <input type="file" id="file" accept="audio/*">
+    <button id="micBtn" type="button">Record mic</button>
+  </div>
+  <div class="status" id="status">Load a WAV/audio recording of a caller ID burst, or record one.</div>
+</div>
+
+<div class="panel" id="resultPanel" style="display:none">
+  <h2>Decoded message <span id="checksumBadge"></span></h2>
+  <div id="fields"></div>
+  <div class="hex" id="hexDump"></div>
+</div>
+
+<div class="panel">
+  <h2>About this format</h2>
+  <div class="note">
+    Analog caller ID rides on Bell 202 audio-frequency FSK (1200 Hz = mark/1, 2200 Hz = space/0) sent in the silent interval between the first and second ring, at 1200 baud, 8-N-1 framing. A message opens with a channel-seizure pattern and a mark-signal burst, then the data bytes.<br><br>
+    <b>SDMF</b> (message type 0x04): 8 ASCII digits of date/time (MMDDHHmm) followed by the calling number, or the letter <b>O</b> (out of area) / <b>P</b> (private).<br>
+    <b>MDMF</b> (message type 0x80): a sequence of parameter records. This decoder reads the common ones — 0x01 date/time, 0x02 calling number, 0x07 calling name, 0x04/0x08 reason-for-absence codes — and shows any other parameter type as raw hex.<br><br>
+    This is a software FSK demodulator reading whatever audio you give it. It has not been validated against a hardware caller-ID receiver or a large corpus of real-world captures, and noisy or low-quality recordings will decode poorly or not at all. It only reads audio you provide; it has no line, modem, or telecom network access and cannot produce or inject a caller ID signal.
+  </div>
+</div>
+</main>
+
+<script>
+const statusEl = document.getElementById('status');
+const resultPanel = document.getElementById('resultPanel');
+const fieldsEl = document.getElementById('fields');
+const hexEl = document.getElementById('hexDump');
+const badgeEl = document.getElementById('checksumBadge');
+
+document.getElementById('file').addEventListener('change', async (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  statusEl.textContent = 'Decoding ' + f.name + '…';
+  try {
+    const buf = await f.arrayBuffer();
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const audioBuffer = await ctx.decodeAudioData(buf);
+    runDecode(audioBuffer);
+  } catch (err) {
+    statusEl.textContent = 'Could not decode audio: ' + err.message;
+  }
+});
+
+let mediaRecorder, chunks = [], recording = false;
+document.getElementById('micBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('micBtn');
+  if (!recording) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      chunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        statusEl.textContent = 'Decoding recording…';
+        const blob = new Blob(chunks, { type: 'audio/webm' });
+        const buf = await blob.arrayBuffer();
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        try {
+          const audioBuffer = await ctx.decodeAudioData(buf);
+          runDecode(audioBuffer);
+        } catch (err) {
+          statusEl.textContent = 'Could not decode recording: ' + err.message;
+        }
+      };
+      mediaRecorder.start();
+      recording = true;
+      btn.textContent = 'Stop recording';
+      statusEl.textContent = 'Recording… click Stop when the caller ID burst has played.';
+    } catch (err) {
+      statusEl.textContent = 'Microphone unavailable: ' + err.message;
+    }
+  } else {
+    mediaRecorder.stop();
+    recording = false;
+    btn.textContent = 'Record mic';
+  }
+});
+
+// Goertzel power at an arbitrary (non-bin-aligned) frequency over N samples
+// starting at `start`. Used as a matched-filter-style mark/space discriminator
+// instead of zero-crossing counting, which is too coarse at typical recording
+// sample rates (as few as ~7 samples per bit at 8kHz for 1200 baud FSK).
+function goertzelPower(samples, start, N, freq, sampleRate) {
+  const w = 2 * Math.PI * freq / sampleRate;
+  const coeff = 2 * Math.cos(w);
+  let s0 = 0, s1 = 0, s2 = 0;
+  for (let i = 0; i < N; i++) {
+    const idx = start + i;
+    const x = (idx >= 0 && idx < samples.length) ? samples[idx] : 0;
+    s0 = x + coeff * s1 - s2;
+    s2 = s1; s1 = s0;
+  }
+  const real = s1 - s2 * Math.cos(w);
+  const imag = s2 * Math.sin(w);
+  return real * real + imag * imag;
+}
+
+function bitAt(samples, sampleRate, centerSample, samplesPerBit) {
+  const N = Math.max(4, Math.round(samplesPerBit));
+  const start = Math.round(centerSample - N / 2);
+  const mark = goertzelPower(samples, start, N, 1200, sampleRate);
+  const space = goertzelPower(samples, start, N, 2200, sampleRate);
+  return mark >= space ? 1 : 0; // mark(1200Hz)=1, space(2200Hz)=0
+}
+
+// After each byte, resync to the actual next start-bit edge instead of
+// trusting pure interval arithmetic — keeps framing locked even with minor
+// sample-rate/clock mismatch between the recording and the nominal 1200 baud.
+function findEdgeNear(samples, sampleRate, expected, samplesPerBit, wantBit) {
+  const range = samplesPerBit * 1.5, step = samplesPerBit / 10;
+  let best = null, bestDist = Infinity;
+  for (let p = expected - range; p <= expected + range; p += step) {
+    const b = bitAt(samples, sampleRate, p, samplesPerBit);
+    if (b === wantBit) {
+      const d = Math.abs(p - expected);
+      if (d < bestDist) { bestDist = d; best = p; }
+    }
+  }
+  return best;
+}
+
+function findMarkRunEnd(samples, sampleRate, samplesPerBit) {
+  const step = samplesPerBit / 4;
+  const minMarkSamples = sampleRate * 0.08; // require >=80ms steady mark before data
+  let markStart = null;
+  for (let pos = samplesPerBit; pos + samplesPerBit < samples.length; pos += step) {
+    const bit = bitAt(samples, sampleRate, pos, samplesPerBit);
+    if (bit === 1) {
+      if (markStart === null) markStart = pos;
+      if (pos - markStart >= minMarkSamples) {
+        // look ahead for the drop to space (start bit)
+        let scan = pos;
+        while (scan + step < samples.length) {
+          const b = bitAt(samples, sampleRate, scan, samplesPerBit);
+          if (b === 0) return scan;
+          scan += step;
+          if (scan - pos > sampleRate * 0.3) break; // give up this run
+        }
+      }
+    } else {
+      markStart = null;
+    }
+  }
+  return -1;
+}
+
+function decodeBytes(samples, sampleRate) {
+  const baud = 1200;
+  const samplesPerBit = sampleRate / baud;
+  let pos = findMarkRunEnd(samples, sampleRate, samplesPerBit);
+  if (pos < 0) return [];
+  const bytes = [];
+  // Stop once the declared message length (byte 2) is satisfied, rather than
+  // scanning indefinitely — prevents picking up spurious bytes from trailing
+  // silence/noise after the real message ends.
+  let expectedTotal = 200;
+  while (pos !== null && pos + samplesPerBit * 9 < samples.length && bytes.length < expectedTotal) {
+    const startBit = bitAt(samples, sampleRate, pos, samplesPerBit);
+    if (startBit !== 0) break;
+    let byte = 0;
+    for (let b = 0; b < 8; b++) {
+      const bit = bitAt(samples, sampleRate, pos + samplesPerBit * (1 + b), samplesPerBit);
+      if (bit) byte |= (1 << b);
+    }
+    bytes.push(byte);
+    if (bytes.length === 2) expectedTotal = 2 + byte + 1; // mt + len + payload + checksum
+    if (bytes.length >= expectedTotal) break;
+    const nextExpected = pos + samplesPerBit * 10;
+    pos = findEdgeNear(samples, sampleRate, nextExpected, samplesPerBit, 0);
+  }
+  return bytes;
+}
+
+function parseDateTime(ascii) {
+  if (!/^\d{8}$/.test(ascii)) return ascii;
+  const mm = ascii.slice(0, 2), dd = ascii.slice(2, 4), hh = ascii.slice(4, 6), mi = ascii.slice(6, 8);
+  return `${mm}/${dd} ${hh}:${mi}`;
+}
+
+function parseSDMF(payload) {
+  const text = payload.map(b => String.fromCharCode(b)).join('');
+  const dt = text.slice(0, 8);
+  const rest = text.slice(8);
+  const fields = { 'Date/time': parseDateTime(dt) };
+  if (rest === 'O') fields['Number'] = 'Out of area';
+  else if (rest === 'P') fields['Number'] = 'Private / blocked';
+  else fields['Number'] = rest;
+  return fields;
+}
+
+function parseMDMF(payload) {
+  const fields = {};
+  let i = 0;
+  while (i + 1 < payload.length) {
+    const type = payload[i];
+    const len = payload[i + 1];
+    const data = payload.slice(i + 2, i + 2 + len);
+    const text = data.map(b => String.fromCharCode(b)).join('');
+    switch (type) {
+      case 0x01: fields['Date/time'] = parseDateTime(text); break;
+      case 0x02:
+        fields['Number'] = text === 'O' ? 'Out of area' : text === 'P' ? 'Private / blocked' : text;
+        break;
+      case 0x07:
+        fields['Name'] = text === 'O' ? 'Out of area' : text === 'P' ? 'Private / blocked' : text;
+        break;
+      case 0x04: fields['No-number reason'] = text; break;
+      case 0x08: fields['No-name reason'] = text; break;
+      default: fields['Param 0x' + type.toString(16).padStart(2, '0')] = text || '(binary)';
+    }
+    i += 2 + len;
+  }
+  return fields;
+}
+
+function runDecode(audioBuffer) {
+  const samples = audioBuffer.getChannelData(0);
+  const sampleRate = audioBuffer.sampleRate;
+  const bytes = decodeBytes(samples, sampleRate);
+
+  if (bytes.length < 3) {
+    statusEl.textContent = 'No caller ID burst found (need a clean recording with the FSK data present).';
+    resultPanel.style.display = 'none';
+    return;
+  }
+
+  const mt = bytes[0];
+  const len = bytes[1];
+  const payload = bytes.slice(2, 2 + len);
+  const checksumByte = bytes[2 + len];
+
+  let sum = 0;
+  for (let i = 0; i < 2 + len; i++) sum += bytes[i];
+  const computedChecksum = (0x100 - (sum & 0xff)) & 0xff;
+  const checksumOk = checksumByte !== undefined && checksumByte === computedChecksum;
+
+  let fields, typeName;
+  if (mt === 0x04) { typeName = 'SDMF'; fields = parseSDMF(payload); }
+  else if (mt === 0x80) { typeName = 'MDMF'; fields = parseMDMF(payload); }
+  else { typeName = 'Unknown (0x' + mt.toString(16) + ')'; fields = {}; }
+
+  fieldsEl.innerHTML = `<div class="field"><b>Format</b><span>${typeName}</span></div>` +
+    Object.entries(fields).map(([k, v]) => `<div class="field"><b>${k}</b><span>${v}</span></div>`).join('');
+
+  badgeEl.innerHTML = checksumByte === undefined
+    ? ''
+    : checksumOk
+      ? '<span class="badge ok">checksum OK</span>'
+      : '<span class="badge bad">checksum mismatch</span>';
+
+  hexEl.textContent = 'Raw bytes: ' + bytes.map(b => b.toString(16).padStart(2, '0')).join(' ');
+
+  resultPanel.style.display = 'block';
+  statusEl.textContent = `Decoded ${bytes.length} bytes.`;
+}
+</script>
+</body>
+</html>

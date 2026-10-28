@@ -18,6 +18,7 @@ The site is organised by tone type. All pages share navigation, a volume control
 | Call Progress & Alerts | `progress.html` | Neutral | Dial, ringback, busy, reorder variants, stutter dial, SAS, CAS, call waiting, off-hook howler, recording warning, five SIT variants, CEPT and UK tones |
 | Radio, Data & Test | `lab.html` | Green PCB prototype | CTCSS, 1750 Hz, SELCAL, CCIR/ZVEI five-tone, Quick Call II, Plectron, MDC1200/MODAT/VINSON-style demos, EAS/SAME/DSC demos, Kansas City and CUTS cassette data, 1000/1004/1020 Hz references, frequency mixer |
 | History & Sources | `history.html` | Neutral | Research method, status labels, complete catalog table generated from the data, source register |
+| Caller ID Decoder | `callerid.html` | Payphone metal | Standalone Bell 202 FSK caller ID decoder (SDMF/MDMF) for an uploaded file or a microphone recording, which it asks permission for. It decodes audio you provide; it cannot generate or inject caller ID. It keeps its own self-contained code and does not use the shared tone catalog. |
 
 ### Old addresses
 
@@ -81,6 +82,7 @@ Static HTML, CSS and plain JavaScript; no framework, build step, backend, remote
 ```text
 webphreak/
 ├── index.html, redbox.html, bluebox.html, progress.html, lab.html, history.html
+├── callerid.html        # standalone Bell 202 caller ID decoder (own inline code)
 ├── prototype.html, signals.html, phreak.html, heritage.html, tribute.html   # old-address maps
 ├── assets/
 │   ├── css/webphreak.css   # themes, mechanical keycaps, payphone, PCB board, dialog

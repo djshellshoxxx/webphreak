@@ -46,6 +46,7 @@ code { font-family: var(--mono); font-size: .9em; }
 #site-nav a[data-cat="dtmf"]::before { content: "● "; color: #c7cbcf; }
 #site-nav a[data-cat="progress"]::before { content: "● "; color: #9aa1a9; }
 #site-nav a[data-cat="lab"]::before { content: "● "; color: #6fcf97; }
+#site-nav a[data-cat="callerid"]::before { content: "● "; color: #c792ea; }
 #site-nav a[data-cat="history"]::before { content: "● "; color: #d7b25a; }
 
 /* ---------- control bar ---------- */

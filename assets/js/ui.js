@@ -9,7 +9,7 @@
   const { catalog, refs, timeline: TL, synth, wav, engine } = WP;
   const doc = root.document;
 
-  const NAV = catalog.CATEGORIES.map(c => ({ href: c.page, label: c.title, cat: c.id })).concat([{ href: 'history.html', label: 'History & Sources', cat: 'history' }]);
+  const NAV = catalog.CATEGORIES.map(c => ({ href: c.page, label: c.title, cat: c.id })).concat([{ href: 'callerid.html', label: 'Caller ID Decoder', cat: 'callerid' }, { href: 'history.html', label: 'History & Sources', cat: 'history' }]);
   const PREF_KEY = 'webphreak.volume';
 
   // ---------- small DOM helpers ----------

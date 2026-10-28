@@ -7,17 +7,23 @@
 <meta name="theme-color" content="#15171a">
 <title>DTMF Payphone Keypad · WebPhreak</title>
 <link rel="stylesheet" href="assets/css/webphreak.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 <script src="assets/js/refs.js" defer></script>
 <script src="assets/js/timeline.js" defer></script>
 <script src="assets/js/synth.js" defer></script>
 <script src="assets/js/wav.js" defer></script>
 <script src="assets/js/catalog.js" defer></script>
 <script src="assets/js/engine.js" defer></script>
+<script src="assets/js/detect.js" defer></script>
+<script src="assets/js/scope.js" defer></script>
+<script src="assets/js/rotary.js" defer></script>
 <script src="assets/js/ui.js" defer></script>
 </head>
 <body class="theme-payphone" data-page="dtmf">
 <a class="skip" href="#main">Skip to content</a>
-<nav id="site-nav" aria-label="Tone groups"><a class="brand" href="index.html">WEBPHREAK</a><ul><li><a href="index.html">DTMF Keypad</a></li><li><a href="redbox.html">Payphone / Redbox</a></li><li><a href="bluebox.html">Bluebox / MF / Trunk</a></li><li><a href="progress.html">Call Progress &amp; Alerts</a></li><li><a href="lab.html">Radio, Data &amp; Test</a></li><li><a href="callerid.html">Caller ID Decoder</a></li><li><a href="history.html">History &amp; Sources</a></li></ul></nav>
+<nav id="site-nav" aria-label="Tone groups"><a class="brand" href="index.html">WEBPHREAK</a><ul><li><a href="index.html">DTMF Keypad</a></li><li><a href="redbox.html">Payphone / Redbox</a></li><li><a href="bluebox.html">Bluebox / MF / Trunk</a></li><li><a href="progress.html">Call Progress &amp; Alerts</a></li><li><a href="lab.html">Radio, Data &amp; Test</a></li><li><a href="compose.html">Tone Calculator</a></li><li><a href="decode.html">Tone Decoder</a></li><li><a href="callerid.html">Caller ID Decoder</a></li><li><a href="history.html">History &amp; Sources</a></li></ul></nav>
 <main id="main">
 <h1>DTMF Payphone Keypad</h1>
 <p class="lede">Press and hold a key to hear its two simultaneous frequencies. Keyboard: 0–9, <kbd>*</kbd>, <kbd>#</kbd>, <kbd>A</kbd>–<kbd>D</kbd> (or <kbd>Q W E R</kbd> for A–D). <kbd>Esc</kbd> stops all sound.</p>
@@ -31,6 +37,13 @@
   <h2 id="h-table">Key details and WAV downloads</h2>
   <p>Each row's ⓘ button opens frequencies, timing, sources and status; ⤓ exports a WAV (continuous tone, default 5 s).</p>
   <div class="tablewrap"><table id="dtmf-table"></table></div>
+</section>
+<section class="bank" aria-labelledby="h-rotary">
+  <h2 id="h-rotary">Rotary dial</h2>
+  <p>Before Touch-Tone, phones dialed by interrupting the line current: dialing 5 sends five clicks. Drag a finger hole clockwise to the metal finger stop and let go. If you let go early, nothing is dialed. You can also tap a hole, or focus it and press Enter, to dial it automatically.</p>
+  <div id="rotary" class="rotary-wrap"></div>
+  <details class="help"><summary>Pulse digits: details and WAV downloads</summary><div class="tablewrap"><table id="rotary-table"></table></div>
+  <p class="evidence">Timing: 10 pulses per second, 66 ms break and 34 ms make (a ~2:1 ratio; CEPT allows 60–68 % break). The click is a modelled sound, not a recording, so these entries are marked “approximate”.</p></details>
 </section>
 <details class="help" open>
   <summary>History and help</summary>

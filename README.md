@@ -12,11 +12,13 @@ The site is organised by tone type. All pages share navigation, a volume control
 
 | Page | File | Theme | Contents |
 | --- | --- | --- | --- |
-| DTMF Keypad | `index.html` | Metallic payphone | 16-key DTMF (0–9, \*, #, A–D) with LCD readout, key table, AUTOVON A–D history |
+| DTMF Keypad | `index.html` | Metallic payphone | 16-key DTMF (0–9, \*, #, A–D) with LCD readout, key table, AUTOVON A–D history, and a draggable **rotary dial** that plays pulse-dialing clicks |
 | Payphone / Redbox | `redbox.html` | Red | US ACTS coin tones, alternative hobbyist timings, Canadian research items, and a green-highlighted **Greenbox** section (coin collect / return / ringback) |
 | Bluebox / MF / Trunk | `bluebox.html` | Blue | 2600 Hz SF, MF (R1) digits, KP, ST, supplementary pairs (ST3P/Code 11, STP/Code 12, ST2P/KP2), CCITT No. 5, No. 4, all 30 R2 pairs, UK AC signalling |
 | Call Progress & Alerts | `progress.html` | Neutral | Dial, ringback, busy, reorder variants, stutter dial, SAS, CAS, call waiting, off-hook howler, recording warning, five SIT variants, CEPT and UK tones |
 | Radio, Data & Test | `lab.html` | Green PCB prototype | CTCSS, 1750 Hz, SELCAL, CCIR/ZVEI five-tone, Quick Call II, Plectron, MDC1200/MODAT/VINSON-style demos, EAS/SAME/DSC demos, Kansas City and CUTS cassette data, 1000/1004/1020 Hz references, frequency mixer |
+| Tone Calculator | `compose.html` | Payphone metal | Calculator-style sequencer: type or key in a **tone formula** that arranges any catalog tone, raw frequencies, stacked tones and silences with exact timing; live timeline, play, WAV export, saved formulas (this browser), JSON import/export, share links and 14 examples |
+| Tone Decoder | `decode.html` | Neutral | Recognizes DTMF, MF, 2600 Hz, ACTS coin bursts and dial/busy/ringback pairs in a catalog sample, an audio file you choose, or the microphone (opt-in, live, nothing recorded) |
 | History & Sources | `history.html` | Neutral | Research method, status labels, complete catalog table generated from the data, source register |
 | Caller ID Decoder | `callerid.html` | Payphone metal | Standalone Bell 202 FSK caller ID decoder (SDMF/MDMF) for an uploaded file or a microphone recording, which it asks permission for. It decodes audio you provide; it cannot generate or inject caller ID. It keeps its own self-contained code and does not use the shared tone catalog. |
 
@@ -39,17 +41,45 @@ Earlier pages still load, so old bookmarks do not 404. Each now shows a table ma
 - **Sequences** (coin tones, SIT…): tap to play once; tap again to stop early.
 - **ⓘ Info** opens frequencies, timing, region, evidence status, notes on conflicts and changes, and source links. Desktop hover and keyboard focus show a short tooltip; every key also has the same text as its accessible description.
 - **⤓ WAV** opens the download section of the same dialog.
+- **〰 Scope** (control bar, every page) opens a live oscilloscope trace, a 0–4 kHz spectrum with peak frequencies, and a readout naming the tone that is playing.
+- **Rotary dial** (DTMF page): drag a finger hole to the finger stop and let go; letting go early dials nothing, as on a real dial. Tap a hole or press Enter on it to dial automatically.
+- **Install / offline:** the site is an installable web app. After one visit every page works offline (Chromium shows an “⤓ Install app” button; on iOS use Share → Add to Home Screen).
 - **STOP ALL** or **Esc** silences everything immediately. Sound also stops when the window loses focus, the tab is hidden, or you leave the page.
 - Audio starts only after a click, tap or key press. The default volume is 30 % on a squared taper; start low with headphones.
 
+## Tone formulas (Tone Calculator)
+
+`compose.html` compiles a formula language (`assets/js/formula.js`) into a list of timed notes, renders it once (in a Web Worker when possible) and uses the same samples for playback and WAV export. **Full reference: [`docs/formula-language.md`](docs/formula-language.md)**, also built into the page, with 60+ loadable examples (`assets/js/formula-examples.js`).
+
+| Feature | Syntax |
+| --- | --- |
+| Sequence | `+`, commas, spaces and new lines mean “then”; `//` comments |
+| Keys, catalog tones, frequencies, notes | `#411`, `KP`, `[acts-quarter]`, `440Hz`, `C4`, `F#3` |
+| Length, silence | `5@2s`, `1@80` (ms), `50ms`, `1sSi`, `Si@250ms` |
+| Tempo and note lengths | `bpm=120`, `@1/4`, `@1/8.` (dotted), `@1/8t` (triplet), bare `1/4` = rest |
+| Stacking and levels | `697Hz&1209Hz`, `1209Hz%70`, `1209Hz%-6dB` |
+| Groups and repeats | `( … )@68ms`, `10( … )`, `( … )x3`, `KP x2` |
+| Parallel tracks, absolute placement | `{ DT@3s \| 1s 5551212 }`, `at 2s: KP` |
+| Waveforms, glides, noise | `:square` `:triangle` `:saw`, `300Hz..3000Hz`, `noise@1s` |
+| Modifiers | `~fade( )` `~fadein( )` `~fadeout( )` `~am(33Hz)` `~fm(5Hz, 20Hz)` `~detune(2%)` `~gain(-6dB)` |
+| Settings | `tone=` `gap=` `keys=dtmf\|mf\|pulse` `level=` `bpm=` `ramp=` `wave=` `glide=lin\|exp` `twist=` `jitter=` `seed=` `pause=` `wait=` |
+| Dial strings | `"1-800-FLOWERS"` (letters → keys), `,` pause, `;` wait for dial tone |
+| Variables, macros, sections | `$num = 5551212`, `$beep($f, $len) = $f@$len 80ms`, multi-line `$intro = ( … )` |
+| Loops | `for $f in 300Hz..900Hz step 100Hz: $f@100ms`, `for $k in (1, 5, 9): …` |
+| Random (repeatable) | `rand(1..9)`, `rand(KP, ST)`, `rand(300Hz..900Hz)`, `jitter=15ms`, `seed=7` |
+| Cadences | `cadence(440Hz&480Hz, 2s, 4s)x3` |
+
+Editor: live error checking with line/column (click to select), autocomplete, ✨ Tidy (pretty-print without changing the sound), a plain-English explanation, a multi-lane timeline, saved formulas, JSON import/export and share links. Limits: 120 s, 20,000 notes, 10,000 repeats or loop steps.
+
 ## WAV downloads
 
-Every catalog entry (132 at present) has a download. Files are generated in the browser; nothing is uploaded and no microphone permission is used.
+Every catalog entry (142 at present, including the ten rotary pulse digits) has a download. Files are generated in the browser; nothing is uploaded and no microphone permission is used.
 
 - **Format:** RIFF/WAVE PCM, mono, 16-bit, 44.1 kHz, with correct header fields.
 - **Continuous tones:** choose 1–60 s (default 5 s).
 - **Repeating cadences:** choose a whole number of cycles (default about 10 s worth, export capped at 120 s), so the file ends after a complete cycle, including its final silence.
 - **Fixed sequences:** the complete sequence once, including all gaps.
+- **Rotary pulses:** each click is a modelled 8 ms burst (break clicks louder than make clicks) at 10 pulses/s, 66 ms break / 34 ms make; labelled approximate.
 - **Levels:** the loudest segment of each entry peaks at −6 dBFS; relative levels between segments are preserved. A 4 ms linear fade at the start and end of each sounding run prevents clicks; it sits inside the documented duration, so on/off timing is unchanged.
 - **Names:** `webphreak_<id>[_illustrative][_<5s|3x>].wav`, lowercase ASCII only.
 - Object URLs are revoked after each download; rendering errors are reported in the dialog.
@@ -81,7 +111,7 @@ Static HTML, CSS and plain JavaScript; no framework, build step, backend, remote
 
 ```text
 webphreak/
-├── index.html, redbox.html, bluebox.html, progress.html, lab.html, history.html
+├── index.html, redbox.html, bluebox.html, progress.html, lab.html, compose.html, decode.html, history.html
 ├── callerid.html        # standalone Bell 202 caller ID decoder (own inline code)
 ├── prototype.html, signals.html, phreak.html, heritage.html, tribute.html   # old-address maps
 ├── assets/
@@ -92,12 +122,23 @@ webphreak/
 │       ├── timeline.js     # entry -> timed events; durations, cycles, timing text
 │       ├── synth.js        # deterministic renderer (WAV export, tests)
 │       ├── wav.js          # 16-bit PCM WAV encoder/decoder, safe filenames
-│       ├── engine.js       # Web Audio playback, look-ahead scheduler, STOP ALL, mixer
+│       ├── engine.js       # Web Audio playback, look-ahead scheduler, STOP ALL, mixer, analyser tap
+│       ├── detect.js       # Goertzel tone detector used by the decoder and the live scope
+│       ├── scope.js        # oscilloscope / spectrum / live readout panel
+│       ├── rotary.js       # draggable rotary dial
+│       ├── decoder.js      # decode.html: catalog sample, file and microphone inputs
+│       ├── formula.js      # tone formula tokenizer/expander/parser/compiler, tidy and explain
+│       ├── render-worker.js # renders formula notes off the main thread
+│       ├── formula-examples.js  # built-in example formulas
+│       ├── composer.js     # compose.html: the Tone Calculator UI
 │       └── ui.js           # nav, controls, tiles, tooltip, dialog, keyboard, tables
+│   └── icons/              # app icons (SVG + 192/512 PNG)
+├── manifest.webmanifest, sw.js  # installable app + offline cache (network first, cache fallback)
 ├── tests/
 │   ├── unit.test.js        # node:test – catalog, timing, spectrum, clipping, WAV
 │   └── e2e.js              # Playwright – pages, input, downloads, playback/export match
 ├── docs/research-notes.md  # corrections, conflicts, open research items
+├── docs/formula-language.md  # complete tone formula reference
 └── email2sms/              # Separate Node service, not part of the static site (see below)
 ```
 
@@ -120,7 +161,7 @@ Then open http://localhost:8000/. Opening `index.html` directly also works.
 Unit tests need only Node.js 18 or newer:
 
 ```bash
-node --test tests/unit.test.js
+node --test tests/unit.test.js tests/formula.test.js
 ```
 
 Browser tests need Playwright with at least Chromium installed (`npm i -D playwright && npx playwright install chromium` if you do not have it). They serve the repository under `/webphreak/` with case-sensitive paths, like GitHub Pages:
@@ -129,13 +170,14 @@ Browser tests need Playwright with at least Chromium installed (`npm i -D playwr
 node tests/e2e.js chromium firefox webkit
 ```
 
-The e2e suite checks: every page loads without console errors, zoom is allowed and no remote fonts load; each catalog entry has exactly one key on its page; navigation and every old-page link resolve to an existing key; info dialog content and Escape; tooltip on hover and focus; hold/release by pointer, keyboard, blur, STOP ALL and Esc; repeated play/stop and voice replacement; navigating during playback; the mixer; a download for **every** entry with header, length, filename and peak checks; mobile overflow and 36 px touch targets; reduced motion. In Chromium it also renders entries through the Web Audio scheduling path in an `OfflineAudioContext` and compares them with the WAV renderer.
+The e2e suite also covers the live scope readout, rotary drag/early-release/tap, the decoder (catalog round trip and an uploaded WAV) and offline reloads through the service worker. The base checks are: every page loads without console errors, zoom is allowed and no remote fonts load; each catalog entry has exactly one key on its page; navigation and every old-page link resolve to an existing key; info dialog content and Escape; tooltip on hover and focus; hold/release by pointer, keyboard, blur, STOP ALL and Esc; repeated play/stop and voice replacement; navigating during playback; the mixer; a download for **every** entry with header, length, filename and peak checks; mobile overflow and 36 px touch targets; reduced motion. In Chromium it also renders entries through the Web Audio scheduling path in an `OfflineAudioContext` and compares them with the WAV renderer.
 
 ## Limitations
 
 - Output frequency accuracy depends on the browser, operating system and sound device. Browser volume is not a calibrated electrical level, dBm or sound pressure; 0 dBm into 600 Ω explanations are historical context only.
 - Data examples (MDC1200, DSC, SAME, VINSON-style) are illustrative. The Kansas City and CUTS "HI" examples follow the published bit format but have not been tested on real hardware. Tarbell encoding is described but not synthesized.
 - Many cadences are shown in one documented variant; national and vendor variants exist.
+- The decoder is tested on the site's own synthesized audio (with noise), not on real line recordings. It ignores tones outside its set rather than guessing. The service worker uses a manual cache version: bump `VERSION` in `sw.js` when adding files.
 - Automated tests have run in headless Chromium only; Firefox and WebKit runs and real-device testing are still to do.
 
 ## email2sms (separate Node service)

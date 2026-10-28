@@ -93,7 +93,8 @@ test('requested families are present', () => {
     'ctcss-100', 'burst-1750', 'zvei-12345', 'selcal-ab-cd', 'qc2', 'plectron-legacy', 'mdc1200-demo', 'modat-demo',
     'kcs-0', 'kcs-1', 'cuts-1200-hi', 'ref-1000', 'ref-1004', 'ref-1020', 'same-preamble', 'dsc-vhf-demo', 'vinson-demo', 'eas-attention'];
   for (const id of need) assert.ok(catalog.byId.get(id), 'missing ' + id);
-  assert.equal(ENTRIES.filter(e => e.cat === 'dtmf').length, 16);
+  assert.equal(ENTRIES.filter(e => e.sec === 'keypad').length, 16);
+  assert.equal(ENTRIES.filter(e => e.sec === 'rotary').length, 10);
   assert.equal(ENTRIES.filter(e => e.sec === 'r2f').length, 15);
   assert.equal(ENTRIES.filter(e => e.sec === 'r2b').length, 15);
 });
@@ -252,4 +253,72 @@ test('freqSummary distinguishes simultaneous, sequential and FSK content', () =>
   assert.equal(TL.freqSummary(catalog.byId.get('sit-ic')), '913.8 → 1370.6 → 1776.7 Hz');
   assert.equal(TL.freqSummary(catalog.byId.get('acts-quarter')), '1700 + 2200 Hz');
   assert.equal(TL.freqSummary(catalog.byId.get('kcs-hi')), '1200 / 2400 Hz (FSK)');
+});
+
+// ---------- decoder playground ----------
+const detect = require('../assets/js/detect.js');
+const CANDS = detect.buildCandidates(catalog);
+/** Render entries back to back with silent gaps between them. */
+function sequence(ids, { on = 0.1, gap = 0.06, noise = 0 } = {}) {
+  const parts = ids.map(id => {
+    const e = catalog.byId.get(id);
+    return synth.render(TL.expand(e, { duration: on, cycles: 1 }), { sampleRate: SR });
+  });
+  const g = Math.round(gap * SR);
+  const total = parts.reduce((s, p) => s + p.length + g, g);
+  const out = new Float32Array(total);
+  let o = g;
+  for (const p of parts) { out.set(p, o); o += p.length + g; }
+  let seed = 12345;
+  if (noise) for (let i = 0; i < out.length; i++) { seed = (seed * 1103515245 + 12345) & 0x7fffffff; out[i] += noise * (seed / 0x7fffffff * 2 - 1); }
+  return out;
+}
+
+test('decoder recognizes all 16 DTMF keys in order', () => {
+  const ids = catalog.ENTRIES.filter(e => e.sec === 'keypad').map(e => e.id);
+  const ev = detect.decode(sequence(ids), SR, CANDS);
+  assert.deepEqual(ev.map(e => e.id), ids);
+  assert.ok(ev.every(e => e.system === 'DTMF'));
+});
+
+test('decoder reads an MF address at sender timing (KP 100 ms, digits 68 ms on/off)', () => {
+  const ids = ['mf-kp', 'mf-1', 'mf-2', 'mf-1', 'mf-0', 'mf-st'];
+  const x = sequence(ids, { on: 0.068, gap: 0.068 });
+  const ev = detect.decode(x, SR, CANDS);
+  assert.deepEqual(ev.map(e => e.label), ['KP', '1', '2', '1', '0', 'ST']);
+  assert.match(detect.summarize(ev), /^MF KP 1 2 1 0 ST$/);
+});
+
+test('decoder distinguishes DTMF from MF and the supplementary MF pairs', () => {
+  const ids = ['dtmf-5', 'mf-5', 'mf-st2p', 'mf-stp', 'mf-st3p', 'sf-2600'];
+  assert.deepEqual(detect.decode(sequence(ids), SR, CANDS).map(e => e.id), ids);
+});
+
+test('decoder keeps coin-tone gaps: ACTS quarter = 5 bursts', () => {
+  const x = synth.render(TL.expand(catalog.byId.get('acts-quarter')), { sampleRate: SR });
+  const ev = detect.decode(x, SR, CANDS);
+  assert.equal(ev.length, 5);
+  assert.ok(ev.every(e => e.label === 'ACTS coin burst'));
+});
+
+test('decoder copes with noise at -26 dB and ignores silence', () => {
+  const ids = ['dtmf-1', 'dtmf-9', 'dtmf-pound'];
+  assert.deepEqual(detect.decode(sequence(ids, { noise: 0.05 }), SR, CANDS).map(e => e.id), ids);
+  assert.deepEqual(detect.decode(new Float32Array(SR), SR, CANDS), []);
+});
+
+test('decoder rejects tones it does not know (SIT, R2) instead of guessing', () => {
+  const x = synth.render(TL.expand(catalog.byId.get('sit-ic')), { sampleRate: SR });
+  assert.deepEqual(detect.decode(x, SR, CANDS), []);
+});
+
+test('rotary pulse digits: n clicks at 10 pps', () => {
+  const e = catalog.byId.get('pulse-0');
+  const tl = TL.expand(e);
+  assert.equal(tl.events.filter(ev => ev.click === 1).length, 10);
+  assert.ok(Math.abs(tl.duration - 1.0) < 1e-9);
+  const x = synth.render(tl, { sampleRate: SR });
+  const at = t => Math.round(t * SR);
+  assert.ok(rms(x, at(0), at(0.008)) > 0.05, 'click at break start');
+  assert.equal(rms(x, at(0.02), at(0.06)), 0, 'silence between clicks');
 });

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Arrange any WebPhreak tone, raw frequencies and silences into timed sequences with a calculator-style formula editor; play, save, share and export WAV.">
+<meta name="theme-color" content="#15171a">
+<title>Tone Calculator · WebPhreak</title>
+<link rel="stylesheet" href="assets/css/webphreak.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+<script src="assets/js/refs.js" defer></script>
+<script src="assets/js/timeline.js" defer></script>
+<script src="assets/js/synth.js" defer></script>
+<script src="assets/js/wav.js" defer></script>
+<script src="assets/js/catalog.js" defer></script>
+<script src="assets/js/engine.js" defer></script>
+<script src="assets/js/detect.js" defer></script>
+<script src="assets/js/scope.js" defer></script>
+<script src="assets/js/formula.js" defer></script>
+<script src="assets/js/formula-examples.js" defer></script>
+<script src="assets/js/composer.js" defer></script>
+<script src="assets/js/ui.js" defer></script>
+</head>
+<body class="theme-neutral" data-page="compose">
+<a class="skip" href="#main">Skip to content</a>
+<nav id="site-nav" aria-label="Tone groups"><a class="brand" href="index.html">WEBPHREAK</a><ul><li><a href="index.html">DTMF Keypad</a></li><li><a href="redbox.html">Payphone / Redbox</a></li><li><a href="bluebox.html">Bluebox / MF / Trunk</a></li><li><a href="progress.html">Call Progress &amp; Alerts</a></li><li><a href="lab.html">Radio, Data &amp; Test</a></li><li><a href="compose.html">Tone Calculator</a></li><li><a href="decode.html">Tone Decoder</a></li><li><a href="callerid.html">Caller ID Decoder</a></li><li><a href="history.html">History &amp; Sources</a></li></ul></nav>
+<main id="main">
+<h1>Tone Calculator</h1>
+<p class="lede">Arrange any tone on this site, raw frequencies and silences into a sequence, with exact timing. Type a formula into the display or build it with the keys, then play it, save it, share it or download it as a WAV. Hover or focus any key for help, and see the reference below.</p>
+<div id="composer"></div>
+<section class="help-ref" aria-labelledby="h-ref">
+<h2 id="h-ref">Formula reference</h2>
+<p>The calculator turns a short text formula into sound. Everything below also appears in the <a href="https://github.com/djshellshoxxx/webphreak/blob/main/docs/formula-language.md">full language reference</a>. Load any of the examples above to experiment.</p>
+<nav class="ref-index" aria-label="Reference sections"><a href="#ref-basics">Basics</a> <a href="#ref-time">Durations &amp; tempo</a> <a href="#ref-items">What can play</a> <a href="#ref-combine">Stacking &amp; repeats</a> <a href="#ref-layers">Tracks &amp; at</a> <a href="#ref-shape">Shaping sound</a> <a href="#ref-settings">Settings</a> <a href="#ref-dial">Dial strings</a> <a href="#ref-vars">Variables &amp; macros</a> <a href="#ref-loops">Loops</a> <a href="#ref-rand">Randomness</a> <a href="#ref-cadence">Cadences</a> <a href="#ref-editor">Editor</a> <a href="#ref-limits">Limits</a></nav>
+
+<details class="help" open id="ref-basics"><summary>Basics</summary>
+<p>Items play one after another. <code>+</code>, commas, spaces and new lines all mean “then”. Anything after <code>//</code> is a comment. Tones last 500 ms unless you say otherwise.</p>
+<div class="tablewrap"><table class="syntax"><thead><tr><th scope="col">Write</th><th scope="col">Meaning</th><th scope="col">Example</th></tr></thead><tbody><tr><td><code>#411</code></td><td>Key presses: each character is one press (DTMF unless <code>keys=</code> says otherwise)</td><td><code>DT@2s 1s #411</code></td></tr><tr><td><code>@</code><i>time</i></td><td>How long the item before it sounds; a bare number after @ is milliseconds</td><td><code>5@2s</code>, <code>1@80</code></td></tr><tr><td><i>time</i> alone</td><td>Silence (you may add <code>Si</code>, or write <code>Si@</code>, <code>_@</code>, <code>rest@</code>)</td><td><code>50ms</code>, <code>1sSi</code></td></tr><tr><td><code>//</code></td><td>Comment to the end of the line</td><td><code>DT@1s // dial tone</code></td></tr></tbody></table></div></details>
+
+<details class="help" id="ref-time"><summary>Durations and tempo</summary>
+<div class="tablewrap"><table class="syntax"><thead><tr><th scope="col">Write</th><th scope="col">Meaning</th><th scope="col">Example</th></tr></thead><tbody><tr><td><code>250ms</code> <code>2s</code> <code>1.5sec</code></td><td>Milliseconds and seconds</td><td><code>KP@100ms</code></td></tr><tr><td><code>bpm=</code><i>n</i></td><td>Tempo for note lengths (default 120)</td><td><code>bpm=90</code></td></tr><tr><td><code>1/4</code> <code>1/8</code> <code>1/16</code></td><td>Note lengths at the tempo: at 120 bpm a quarter is 0.5 s</td><td><code>C4@1/4</code>, rest <code>1/8</code></td></tr><tr><td><code>1/4.</code></td><td>Dotted: 1.5× as long</td><td><code>D4@1/8.</code></td></tr><tr><td><code>1/8t</code></td><td>Triplet: ⅔ as long</td><td><code>(C4 D4 E4)@1/8t</code></td></tr></tbody></table></div></details>
+
+<details class="help" id="ref-items"><summary>What can be played</summary>
+<div class="tablewrap"><table class="syntax"><thead><tr><th scope="col">Write</th><th scope="col">Meaning</th><th scope="col">Example</th></tr></thead><tbody><tr><td>Keys</td><td>Digits, <code>*</code>, <code>#</code> and single capital <code>A</code>–<code>D</code></td><td><code>*67</code>, <code>A</code></td></tr><tr><td>Catalog tones</td><td>Any tone on the site by label, alias, id or name; brackets for names with spaces or starting with a digit</td><td><code>DT</code> <code>KP</code> <code>Dialtone</code> <code>[MF 1]</code> <code>[acts-quarter]</code></td></tr><tr><td>Frequencies</td><td>1–20000 Hz</td><td><code>440Hz</code>, <code>1.2kHz</code></td></tr><tr><td>Notes</td><td>Equal temperament, A4 = 440 Hz; always with an octave</td><td><code>C4</code> <code>F#3</code> <code>Bb5</code></td></tr><tr><td>Glides</td><td>Slide between two frequencies or notes</td><td><code>300Hz..3000Hz@2s</code>, <code>C4..C5</code></td></tr><tr><td>Noise</td><td>White noise</td><td><code>noise@300ms</code></td></tr><tr><td>Dial strings</td><td>Quoted numbers with letters and pauses (see below)</td><td><code>"1-800-FLOWERS"</code></td></tr></tbody></table></div>
+<p>Steady catalog tones behave like frequencies. Repeating tones (busy <code>BT</code>, ringback <code>RT</code>, howler <code>ROH</code>) repeat to fill the length you give them. Fixed sequences (coins, SIT, pulse digits) keep their own timing. Data bursts (SAME, MDC1200…) cannot be used.</p></details>
+
+<details class="help" id="ref-combine"><summary>Stacking, groups and repeats</summary>
+<div class="tablewrap"><table class="syntax"><thead><tr><th scope="col">Write</th><th scope="col">Meaning</th><th scope="col">Example</th></tr></thead><tbody><tr><td><code>a&amp;b</code></td><td>Sound together; stacking groups runs them in parallel</td><td><code>697Hz&amp;1209Hz</code>, <code>C4&amp;E4&amp;G4</code></td></tr><tr><td><code>%</code><i>n</i> / <code>%</code><i>-6dB</i></td><td>Relative level of one item</td><td><code>697Hz%60&amp;1209Hz</code></td></tr><tr><td><code>( … )</code></td><td>Group</td><td><code>(1 2 3)</code></td></tr><tr><td><code>( … )@</code><i>time</i></td><td>Default tone length inside the group</td><td><code>(KP 121 ST)@68ms</code></td></tr><tr><td><i>N</i><code>( … )</code>, <code>( … )x</code><i>N</i>, <i>item</i> <code>x</code><i>N</i></td><td>Repeat (up to 10000)</td><td><code>10(2600Hz@2ms 2ms)</code>, <code>KP x2</code></td></tr></tbody></table></div>
+<p>A length after a stack of plain tones covers the whole stack (<code>697Hz&amp;1209Hz@1s</code>); a length right after a group covers just that group.</p></details>
+
+<details class="help" id="ref-layers"><summary>Parallel tracks and absolute placement</summary>
+<div class="tablewrap"><table class="syntax"><thead><tr><th scope="col">Write</th><th scope="col">Meaning</th><th scope="col">Example</th></tr></thead><tbody><tr><td><code>{ a | b | c }</code></td><td>Tracks played at the same time; may span lines</td><td><code>{ DT@3s | 1s 5551212 }</code></td></tr><tr><td><code>at</code> <i>time</i><code>:</code> <i>item</i></td><td>Place an item at an exact time from the start of the current part, without moving on</td><td><code>DT@4s at 1s: 1@150ms</code></td></tr></tbody></table></div></details>
+
+<details class="help" id="ref-shape"><summary>Shaping the sound</summary>
+<div class="tablewrap"><table class="syntax"><thead><tr><th scope="col">Write</th><th scope="col">Meaning</th><th scope="col">Example</th></tr></thead><tbody><tr><td><code>:sine</code> <code>:square</code> <code>:triangle</code> <code>:saw</code></td><td>Waveform (band-limited, no aliasing)</td><td><code>220Hz@1s:square</code></td></tr><tr><td><code>~fade(</code><i>t</i><code>)</code>, <code>~fadein( )</code>, <code>~fadeout( )</code></td><td>Fades</td><td><code>440Hz@2s~fade(300ms)</code></td></tr><tr><td><code>~am(</code><i>rate</i>[<code>,</code> <i>depth%</i>]<code>)</code></td><td>Warble (amplitude modulation)</td><td><code>400Hz@3s~am(33Hz)</code></td></tr><tr><td><code>~fm(</code><i>rate</i><code>,</code> <i>depth</i><code>)</code></td><td>Vibrato (frequency modulation)</td><td><code>A4@2s~fm(6Hz, 20Hz)</code></td></tr><tr><td><code>~detune(</code><i>p%</i> or <i>±fHz</i><code>)</code></td><td>Shift every frequency</td><td><code>5~detune(2%)</code></td></tr><tr><td><code>~gain(</code><i>±dB</i><code>)</code></td><td>Change level</td><td><code>(1 2 3)~gain(-6dB)</code></td></tr></tbody></table></div>
+<p>Modifiers apply to whatever they follow: one tone, a stack or a whole group. Several can follow each other: <code>3000Hz..200Hz@120ms:saw~fadeout(60ms)</code>.</p></details>
+
+<details class="help" id="ref-settings"><summary>Settings</summary>
+<p>Settings affect everything after them. Inside a group or track they last until its end.</p>
+<div class="tablewrap"><table class="syntax"><thead><tr><th scope="col">Setting</th><th scope="col">Values</th><th scope="col">Default</th><th scope="col">Effect</th></tr></thead><tbody>
+<tr><td><code>tone=</code></td><td>time or note length</td><td>500ms</td><td>default tone length</td></tr>
+<tr><td><code>gap=</code></td><td>time</td><td>none</td><td>silence added between consecutive tones</td></tr>
+<tr><td><code>keys=</code></td><td><code>dtmf</code> <code>mf</code> <code>pulse</code></td><td>dtmf</td><td>what digits and dial-string letters play</td></tr>
+<tr><td><code>level=</code></td><td>0–100 or dB</td><td>100</td><td>overall level</td></tr>
+<tr><td><code>bpm=</code></td><td>20–400</td><td>120</td><td>tempo for note lengths</td></tr>
+<tr><td><code>ramp=</code></td><td>time</td><td>4ms</td><td>fade on every tone</td></tr>
+<tr><td><code>wave=</code></td><td>sine square triangle saw</td><td>sine</td><td>default waveform</td></tr>
+<tr><td><code>glide=</code></td><td><code>lin</code> <code>exp</code></td><td>lin</td><td>glide by equal hertz or equal musical steps</td></tr>
+<tr><td><code>twist=</code></td><td>dB</td><td>0dB</td><td>DTMF high tone level relative to the low tone</td></tr>
+<tr><td><code>jitter=</code></td><td>time</td><td>none</td><td>random ± variation of tone and gap lengths</td></tr>
+<tr><td><code>seed=</code></td><td>whole number</td><td>1</td><td>random seed (rand, jitter, noise)</td></tr>
+<tr><td><code>pause=</code></td><td>time</td><td>2s</td><td>length of <code>,</code> in dial strings</td></tr>
+<tr><td><code>wait=</code></td><td>time</td><td>2s</td><td>dial tone played for <code>;</code> in dial strings</td></tr>
+</tbody></table></div></details>
+
+<details class="help" id="ref-dial"><summary>Dial strings</summary>
+<p>Text in double quotes is dialed like a stored phone number. Letters become keypad digits (2 ABC, 3 DEF, 4 GHI, 5 JKL, 6 MNO, 7 PQRS, 8 TUV, 9 WXYZ). <code>,</code> pauses (<code>pause=</code>, default 2 s), <code>;</code> plays dial tone for <code>wait=</code> (default 2 s). Spaces, dashes, brackets, dots, <code>+</code> and <code>/</code> are ignored.</p>
+<pre><code>tone=90ms gap=90ms
+"1-800-FLOWERS"
+"9;5551212,,123#"
+keys=pulse gap=700ms "CALL"</code></pre></details>
+
+<details class="help" id="ref-vars"><summary>Variables, macros and sections</summary>
+<p>Define on its own line, use anywhere after it. Variables can hold frequencies, durations, keys, dial strings or whole sections.</p>
+<pre><code>$E = 329.63Hz
+$num = 5551212
+$beep($f, $len) = $f@$len 80ms     // a macro with parameters
+$intro = (                          // a multi-line section
+  DT@1s 300ms
+  tone=80ms gap=80ms 411
+)
+$E@450ms $num $beep(1000Hz, 100ms) $intro x2</code></pre></details>
+
+<details class="help" id="ref-loops"><summary>Loops</summary>
+<pre><code>for $f in 300Hz..1500Hz step 100Hz: $f@80ms 20ms
+for $n in C4..C5: $n@1/8                  // notes step in semitones
+for $t in 100ms..20ms step 20ms: (tone=$t 1234)
+for $k in (1, 4, 7, *, 0, #): $k@150ms 150ms
+for $o in (C4, C5): (for $s in (0, 4, 7): $o@1/16 )</code></pre>
+<p>The body is the rest of the line or a <code>( … )</code> group that may span lines. Up to 10,000 iterations.</p></details>
+
+<details class="help" id="ref-rand"><summary>Randomness</summary>
+<div class="tablewrap"><table class="syntax"><thead><tr><th scope="col">Write</th><th scope="col">Meaning</th><th scope="col">Example</th></tr></thead><tbody><tr><td><code>rand(a, b, c)</code></td><td>One of the options</td><td><code>rand(KP, ST)</code></td></tr><tr><td><code>rand(1..9)</code></td><td>A key in the range</td><td><code>555 rand(1..9)</code></td></tr><tr><td><code>rand(300Hz..900Hz)</code></td><td>Any frequency in the range</td><td><code>20(rand(300Hz..900Hz)@50ms)</code></td></tr><tr><td><code>jitter=</code></td><td>Human-like timing variation</td><td><code>jitter=20ms</code></td></tr></tbody></table></div>
+<p>Random results are repeatable, so playback and the WAV always match. Change <code>seed=</code> for a different result.</p></details>
+
+<details class="help" id="ref-cadence"><summary>Cadences</summary>
+<p><code>cadence(tone, on, off, on, off, …)</code> writes an on/off rhythm: <code>cadence(440Hz&amp;480Hz, 2s, 4s)x3</code> is North American ringback; <code>cadence(400Hz&amp;450Hz, 400ms, 200ms, 400ms, 2s)</code> the British double ring.</p></details>
+
+<details class="help" id="ref-editor"><summary>Editor features</summary>
+<ul>
+<li><strong>Live check</strong> below the display; click an error to select the problem.</li>
+<li><strong>Autocomplete</strong>: type part of a tone, setting, <code>~</code>modifier, <code>:</code>waveform, note or <code>[</code>catalog id; ↑/↓ then Enter or Tab inserts, Esc closes.</li>
+<li><strong>✨ TIDY</strong> makes spacing and units consistent without changing the sound; comments are kept.</li>
+<li><strong>In plain English</strong> explains each step; the <strong>timeline</strong> shows overlapping parts in lanes and the step list shows the expanded formula.</li>
+<li><strong>Ctrl+Enter</strong> (⌘+Enter) plays, <strong>Esc</strong> stops. <strong>💾 SAVE</strong>, export/import and <strong>🔗 LINK</strong> keep and share formulas.</li>
+</ul></details>
+
+<details class="help" id="ref-limits"><summary>Rendering and limits</summary>
+<ul>
+<li>Playback and WAV use the same rendered samples (44.1 kHz WAV, 16-bit mono). The loudest moment is scaled to −6 dBFS.</li>
+<li>Every tone fades in/out by 4 ms (or <code>ramp=</code>) inside its stated length to avoid clicks.</li>
+<li>Limits: 120 s, 20,000 notes, 10,000 repeats or loop steps, 1–20000 Hz, tones of at least 1 ms.</li>
+</ul>
+<p class="evidence">This tool arranges sounds for listening and audio files. It has no connection to any telephone line or radio. Historical trunk tones (2600 Hz, MF, coin tones) have no effect on modern networks.</p></details>
+</section>
+</main>
+<div id="controls"><noscript><p class="notice">JavaScript is required to generate audio.</p></noscript></div>
+<footer class="site"><p>WebPhreak is a historical audio demonstration. All sound is generated locally in your browser; nothing dials, transmits or connects to a telephone or radio network. Values are labelled by evidence status; see <a href="history.html">History &amp; Sources</a>. Repository: <a href="https://github.com/djshellshoxxx/webphreak">djshellshoxxx/webphreak</a>.</p></footer>
+</body>
+</html>

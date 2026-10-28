@@ -114,10 +114,20 @@ webphreak/
 ├── index.html        # Metallic 16-key DTMF payphone
 ├── prototype.html    # PCB-style call-progress / MF board
 ├── signals.html      # Historical signaling laboratory
+├── email2sms/        # Standalone Node service, separate from the static site (see below)
 └── README.md         # Documentation
 ```
 
 Each page contains its own HTML, CSS and JavaScript. Sound is generated in-browser using `AudioContext`, `OscillatorNode`, and `GainNode`; no prerecorded audio is downloaded. The prototype and signal laboratory build buttons from in-page JavaScript signal definitions, and generate timed or continuous oscillator segments. The three pages link to each other with relative paths, so they work on GitHub Pages project sites and when opened locally.
+
+## email2sms (separate Node service)
+
+`email2sms/` is a standalone Express app that sends SMS through carrier
+email-to-SMS gateways. It is **not** part of the static site and does
+**not** run on GitHub Pages, GitHub Pages serves static files only and
+cannot hold SMTP credentials or run a persistent server. Run it on its
+own host (Unraid Docker container, small VPS, etc.). See
+`email2sms/README.md` for setup.
 
 ## Limitations and accuracy
 

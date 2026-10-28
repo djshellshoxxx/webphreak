@@ -1,0 +1,19 @@
+{
+  "att": {"name": "AT&T", "suffix": "txt.att.net"},
+  "verizon": {"name": "Verizon", "suffix": "vtext.com"},
+  "tmobile": {"name": "T-Mobile", "suffix": "tmomail.net"},
+  "sprint": {"name": "Sprint (legacy)", "suffix": "messaging.sprintpcs.com"},
+  "uscellular": {"name": "US Cellular", "suffix": "email.uscc.net"},
+  "boost": {"name": "Boost Mobile", "suffix": "sms.myboostmobile.com"},
+  "cricket": {"name": "Cricket", "suffix": "sms.cricketwireless.net"},
+  "metropcs": {"name": "MetroPCS", "suffix": "mymetropcs.com"},
+  "googlefi": {"name": "Google Fi", "suffix": "msg.fi.google.com"},
+  "rogers": {"name": "Rogers (Canada)", "suffix": "pcs.rogers.com"},
+  "bell": {"name": "Bell (Canada)", "suffix": "txt.bell.ca"},
+  "telus": {"name": "Telus (Canada)", "suffix": "msg.telus.com"},
+  "fido": {"name": "Fido (Canada)", "suffix": "fido.ca"},
+  "koodo": {"name": "Koodo (Canada)", "suffix": "msg.koodomobile.com"},
+  "virgin_ca": {"name": "Virgin Mobile (Canada)", "suffix": "vmobile.ca"},
+  "freedom": {"name": "Freedom Mobile (Canada)", "suffix": "txt.freedommobile.ca"},
+  "sasktel": {"name": "SaskTel (Canada)", "suffix": "sms.sasktel.com"}
+}

@@ -11,7 +11,8 @@
  *   synthesis 'tones'  each segment starts its oscillators at phase 0
  *             'fsk'    consecutive non-silent segments share continuous phase (data examples)
  *   segments  [{ f:[Hz...], d:seconds, a?:[relative level...], mod?:{ f:Hz, depth:0..1 } }]
- *             f:[] (or omitted) is silence.
+ *             f:[] (or omitted) is silence. click:level (0..1) adds a short line click at the
+ *             segment start (rotary-dial pulses); see synth.clickWave().
  */
 (function (root, factory) {
   const api = factory();
@@ -65,7 +66,7 @@
     const events = [];
     let t = 0;
     const push = seg => {
-      events.push({ t, d: seg.d, tones: tonesOf(seg), mod: seg.mod || null });
+      events.push({ t, d: seg.d, tones: tonesOf(seg), mod: seg.mod || null, click: seg.click || 0 });
       t += seg.d;
     };
     let cycles = 1;

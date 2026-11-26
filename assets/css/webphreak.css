@@ -138,6 +138,11 @@ code { font-family: var(--mono); font-size: .9em; }
 .warn { color: var(--demo); font-size: .85rem; }
 
 /* help / history */
+.resource-list { list-style: none; padding: 0; margin: 0 0 1em; }
+.resource-list li { padding: .65em 0; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.resource-list li:last-child { border-bottom: 0; }
+.resource-list a { display: inline-flex; align-items: center; min-height: 36px; font-weight: 700; }
+.resource-list p { margin: .15em 0 0; color: var(--muted); font-size: .92rem; max-width: 85ch; }
 details.help { margin: 18px 0; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); }
 details.help > summary { cursor: pointer; font-weight: 700; min-height: 40px; display: flex; align-items: center; }
 .help h3 { color: var(--accent); }
